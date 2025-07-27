@@ -37,7 +37,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;
     GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-    InitGame();//здесь инициализируем переменные игры
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_WINDOWSFROG, szWindowClass, MAX_LOADSTRING);
@@ -60,10 +59,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-            /*player->Sprite.show();
-            player->move();*/
-
-            //currenttime = timeGetTime();
         }
     }
     GdiplusShutdown(gdiplusToken);
