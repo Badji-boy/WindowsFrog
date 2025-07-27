@@ -1,0 +1,15 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <g class="layer">
+  <title>Layer 1</title>
+  <g class="background_0" display="inline" id="svg_1">
+   <title>Layer 1</title>
+  </g>
+  <rect class="racket" fill="none" height="66.67" id="svg_16" stroke="#000000" stroke-width="5" width="71.67" x="271.33" y="191.67"/>
+  <rect class="walls" fill="none" height="1902.67" id="svg_2" stroke="#000000" stroke-width="5" transform="rotate(90 961.5 1041.67)" width="56" x="933.5" y="90.33"/>
+  <rect class="walls" fill="none" height="1902.67" id="svg_3" stroke="#000000" stroke-width="5" transform="matrix(1 0 0 1 0 0) matrix(6.12323e-17 1 -1 6.12323e-17 997.165 -925.835)" width="56" x="933.5" y="-915.67"/>
+  <rect class="walls" fill="none" height="948.67" id="svg_4" stroke="#000000" stroke-width="5" transform="matrix(1 0 0 1 0 0)" width="56" x="11.5" y="64.33"/>
+  <rect class="walls" fill="none" height="948.67" id="svg_5" stroke="#000000" stroke-width="5" width="56" x="1857.5" y="68.33"/>
+  <rect class="walls" fill="none" height="370.67" id="svg_6" stroke="#000000" stroke-width="5" transform="rotate(90 314 719.665)" width="56" x="285.5" y="534.33"/>
+ </g>
+</svg>
