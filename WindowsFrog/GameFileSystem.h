@@ -1,137 +1,137 @@
-#pragma once
+п»ї#pragma once
 #include "Structures.h"
 
-//string StrReplace(string* str, string namestr) {
-//    return str->replace(str->find(namestr), namestr.length(), "");
-//}
-//
-////новая фича создание, читалка файлов формата Svg и преобразование ее данных в игровой уровень 
-////создание карт можно делать в редакторе Adobe Photoshop (*2023 версия на которой я проверял)
-//
-//void LoadSVGDataMap(const string NameFileSVG) {
-//    ifstream file;
-//
-//    vector <vector<string>> dS{
-//        {},
-//        {},
-//        {},
-//        {},
-//        {},
-//        {}
-//    }; // здесть хронятся основные данные имя объекта, x, y
-//
-//    vector <vector<string>> bufferData{ {},{} }; // здесть хронятся width, height объекта
-//
-//    string optionArr[]{ "id=", "x=", "y=" ,"width=", "height=","xlink:href=" };
-//
-//    file.open(NameFileSVG + ".svg");
-//
-//
-//    //запуск чтения файла
-//    if (file.is_open()) {
-//        string str = "";
-//        while (!file.eof()) {
-//            file >> str;
-//
-//            for (int i = 0; i < 6; i++) {
-//                if (!str.find(optionArr[i])) {
-//                    StrReplace(&str, optionArr[i]);
-//                    StrReplace(&str, "\"");
-//                    StrReplace(&str, "\"");
-//
-//                    //исключения
-//                    if (!str.find("walls_f") || !str.find("background") || !str.find("image")) {
-//                        if (!str.find("walls_f")) {
-//                            dS[i].push_back("empty");
-//                            dS[5].push_back("error image");
-//                        }
-//
-//                        dS[1].push_back("0");
-//                        dS[2].push_back("0");
-//                    }
-//
-//                    //сортировка данных
-//                    if (str.find("walls_f")) {
-//                        if (str.find("data:")) {
-//                            dS[i].push_back(str);
-//                        }
-//                        else {
-//                            dS[5].push_back("error image");
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        //присвоение и пересборка массива новыми данными ширины и высоты объектов для тех объектов где эти данные записаны в шаблон #image
-//        for (int i = 0; i < dS[0].size(); i++) {
-//            if (dS[5][i] != "error image") {
-//                for (int j = 0; j < dS[0].size(); j++) {
-//                    if (dS[5][i] == "#" + dS[0][j] + "/>") {
-//                        bufferData[0].push_back(dS[3][j]);
-//                        bufferData[1].push_back(dS[4][j]);
-//                    }
-//                }
-//            }
-//            else {
-//                bufferData[0].push_back("standardData");
-//                bufferData[1].push_back("standardData");
-//            }
-//        }
-//        int IDWidth = 0;
-//        int IDHeight = 0;
-//        for (int i = 0; i < bufferData[0].size(); i++) {
-//            if (bufferData[0][i] == "standardData") {
-//                bufferData[0][i] = dS[3][IDWidth++];
-//                bufferData[1][i] = dS[4][IDHeight++];
-//            }
-//        }
-//    }
-//
-//
-//    //загрузка уровня на основе собранных данных
-//    for (int i = 0; i < dS[0].size(); i++) {
-//        //интрепритация стоковых данных в числовые значения типа 0.1 от разрешения экрана пользователя
-//        float x = stof(dS[1][i]) / window.width;
-//        float y = stof(dS[2][i]) / window.height;
-//        float width = stof(bufferData[0][i]) / window.width;
-//        float height = stof(bufferData[1][i]) / window.height;
-//        string nameObject = dS[0][i];
-//
-//
-//        //создание объектов пока что только для уровня 0
-//        if (!nameObject.find("walls")) {
-//            location[0].walls.emplace_back(x, y, width, height, "walls");
-//        }
-//        else if (!nameObject.find("enemy")) {
-//            wolf = new Wolf(x, y, width, height, "enemy1", 40, 5, 3, 0);
-//        }
-//        else if (!nameObject.find("racket")) {
-//            player = new Hero(x, y, width, height, "racket", 40, 5, 3, 0);
-//        }
-//        else if (!nameObject.find("background")) {
-//            location[0].hBack.loadBitmapWithNativeSize(nameObject);
-//        }
-//        else if (!nameObject.find("portal")) {
-//            location[0].portal.emplace_back(x, y, width, height, 1, "racket"); // пока реализациия работает на переход на 1 уровень
-//        }
-//        else if (!nameObject.find("heal")) {
-//            location[0].healingFlask.emplace_back(x, y, width, height, "ball");
-//        }
-//        else if (!nameObject.find("spike")) {
-//            location[0].spike.emplace_back(x, y, width, height, "spike");
-//        }
-//
-//    }
-//    file.close();
-//}
-//
+wstring StrReplace(wstring* str, wstring namestr) {
+    return str->replace(str->find(namestr), namestr.length(), L"");
+}
+
+//РЅРѕРІР°СЏ С„РёС‡Р° СЃРѕР·РґР°РЅРёРµ, С‡РёС‚Р°Р»РєР° С„Р°Р№Р»РѕРІ С„РѕСЂРјР°С‚Р° Svg Рё РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РµРµ РґР°РЅРЅС‹С… РІ РёРіСЂРѕРІРѕР№ СѓСЂРѕРІРµРЅСЊ 
+//СЃРѕР·РґР°РЅРёРµ РєР°СЂС‚ РјРѕР¶РЅРѕ РґРµР»Р°С‚СЊ РІ СЂРµРґР°РєС‚РѕСЂРµ Adobe Photoshop (*2023 РІРµСЂСЃРёСЏ РЅР° РєРѕС‚РѕСЂРѕР№ СЏ РїСЂРѕРІРµСЂСЏР»)
+
+void LoadSVGDataMap(const wstring NameFileSVG) {
+    wifstream file;
+
+    vector <vector<wstring>> dS{
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+    }; // Р·РґРµСЃС‚СЊ С…СЂРѕРЅСЏС‚СЃСЏ РѕСЃРЅРѕРІРЅС‹Рµ РґР°РЅРЅС‹Рµ РёРјСЏ РѕР±СЉРµРєС‚Р°, x, y
+
+    vector <vector<wstring>> bufferData{ {},{} }; // Р·РґРµСЃС‚СЊ С…СЂРѕРЅСЏС‚СЃСЏ width, height РѕР±СЉРµРєС‚Р°
+
+    wstring optionArr[]{ L"id=", L"x=", L"y=" ,L"width=", L"height=",L"xlink:href=" };
+
+    file.open(NameFileSVG + L".svg");
+
+
+    //Р·Р°РїСѓСЃРє С‡С‚РµРЅРёСЏ С„Р°Р№Р»Р°
+    if (file.is_open()) {
+        wstring str =L"";
+        while (!file.eof()) {
+            file >> str;
+
+            for (int i = 0; i < 6; i++) {
+                if (!str.find(optionArr[i])) {
+                    StrReplace(&str, optionArr[i]);
+                    StrReplace(&str, L"\"");
+                    StrReplace(&str, L"\"");
+
+                    //РёСЃРєР»СЋС‡РµРЅРёСЏ
+                    if (!str.find(L"walls_f") || !str.find(L"background") || !str.find(L"image")) {
+                        if (!str.find(L"walls_f")) {
+                            dS[i].push_back(L"empty");
+                            dS[5].push_back(L"error image");
+                        }
+
+                        dS[1].push_back(L"0");
+                        dS[2].push_back(L"0");
+                    }
+
+                    //СЃРѕСЂС‚РёСЂРѕРІРєР° РґР°РЅРЅС‹С…
+                    if (str.find(L"walls_f")) {
+                        if (str.find(L"data:")) {
+                            dS[i].push_back(str);
+                        }
+                        else {
+                            dS[5].push_back(L"error image");
+                        }
+                    }
+                }
+            }
+        }
+
+        //РїСЂРёСЃРІРѕРµРЅРёРµ Рё РїРµСЂРµСЃР±РѕСЂРєР° РјР°СЃСЃРёРІР° РЅРѕРІС‹РјРё РґР°РЅРЅС‹РјРё С€РёСЂРёРЅС‹ Рё РІС‹СЃРѕС‚С‹ РѕР±СЉРµРєС‚РѕРІ РґР»СЏ С‚РµС… РѕР±СЉРµРєС‚РѕРІ РіРґРµ СЌС‚Рё РґР°РЅРЅС‹Рµ Р·Р°РїРёСЃР°РЅС‹ РІ С€Р°Р±Р»РѕРЅ #image
+        for (int i = 0; i < dS[0].size(); i++) {
+            if (dS[5][i] != L"error image") {
+                for (int j = 0; j < dS[0].size(); j++) {
+                    if (dS[5][i] == L"#" + dS[0][j] + L"/>") {
+                        bufferData[0].push_back(dS[3][j]);
+                        bufferData[1].push_back(dS[4][j]);
+                    }
+                }
+            }
+            else {
+                bufferData[0].push_back(L"standardData");
+                bufferData[1].push_back(L"standardData");
+            }
+        }
+        int IDWidth = 0;
+        int IDHeight = 0;
+        for (int i = 0; i < bufferData[0].size(); i++) {
+            if (bufferData[0][i] == L"standardData") {
+                bufferData[0][i] = dS[3][IDWidth++];
+                bufferData[1][i] = dS[4][IDHeight++];
+            }
+        }
+    }
+
+
+    //Р·Р°РіСЂСѓР·РєР° СѓСЂРѕРІРЅСЏ РЅР° РѕСЃРЅРѕРІРµ СЃРѕР±СЂР°РЅРЅС‹С… РґР°РЅРЅС‹С…
+    for (int i = 0; i < dS[0].size(); i++) {
+        //РёРЅС‚СЂРµРїСЂРёС‚Р°С†РёСЏ СЃС‚РѕРєРѕРІС‹С… РґР°РЅРЅС‹С… РІ С‡РёСЃР»РѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ С‚РёРїР° 0.1 РѕС‚ СЂР°Р·СЂРµС€РµРЅРёСЏ СЌРєСЂР°РЅР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+        float x = stof(dS[1][i]) / window.rcPaint.right;
+        float y = stof(dS[2][i]) / window.rcPaint.bottom;
+        float width = stof(bufferData[0][i]) / window.rcPaint.right;
+        float height = stof(bufferData[1][i]) / window.rcPaint.bottom;
+        wstring nameObject = dS[0][i];
+
+
+        //СЃРѕР·РґР°РЅРёРµ РѕР±СЉРµРєС‚РѕРІ РїРѕРєР° С‡С‚Рѕ С‚РѕР»СЊРєРѕ РґР»СЏ СѓСЂРѕРІРЅСЏ 0
+        if (!nameObject.find(L"walls")) {
+            location[0].walls.emplace_back(x, y, width, height, "walls");
+        }
+        else if (!nameObject.find(L"enemy")) {
+            wolf = new Wolf(x, y, width, height, L"enemy1", 40, 5, 3, 0);
+        }
+        else if (!nameObject.find(L"racket")) {
+            player = new Hero(x, y, width, height, L"racket", 40, 5, 3, 0);
+        }
+        else if (!nameObject.find(L"background")) {
+            location[0].hBack.loadBitmapWithNativeSize(nameObject);
+        }
+        else if (!nameObject.find(L"portal")) {
+            location[0].portal.emplace_back(x, y, width, height, L"racket", 1); // РїРѕРєР° СЂРµР°Р»РёР·Р°С†РёРёСЏ СЂР°Р±РѕС‚Р°РµС‚ РЅР° РїРµСЂРµС…РѕРґ РЅР° 1 СѓСЂРѕРІРµРЅСЊ
+        }
+        else if (!nameObject.find(L"heal")) {
+            location[0].healingFlask.emplace_back(x, y, width, height, L"ball");
+        }
+        else if (!nameObject.find(L"spike")) {
+            location[0].spike.emplace_back(x, y, width, height, L"spike");
+        }
+
+    }
+    file.close();
+}
+
 //class Serialization {
 //public:
 //    Serialization(Location_ container) { this->container = container; }
 //
-//    /// добавить функцию создания сохранения с нуля и загрузка мира с нулевого сохранения
-//    /// добавить функцию проверки на наличие изменения данных в файле чтобы создать мир с нуля и перезаписать данные на новые
+//    /// РґРѕР±Р°РІРёС‚СЊ С„СѓРЅРєС†РёСЋ СЃРѕР·РґР°РЅРёСЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ СЃ РЅСѓР»СЏ Рё Р·Р°РіСЂСѓР·РєР° РјРёСЂР° СЃ РЅСѓР»РµРІРѕРіРѕ СЃРѕС…СЂР°РЅРµРЅРёСЏ
+//    /// РґРѕР±Р°РІРёС‚СЊ С„СѓРЅРєС†РёСЋ РїСЂРѕРІРµСЂРєРё РЅР° РЅР°Р»РёС‡РёРµ РёР·РјРµРЅРµРЅРёСЏ РґР°РЅРЅС‹С… РІ С„Р°Р№Р»Рµ С‡С‚РѕР±С‹ СЃРѕР·РґР°С‚СЊ РјРёСЂ СЃ РЅСѓР»СЏ Рё РїРµСЂРµР·Р°РїРёСЃР°С‚СЊ РґР°РЅРЅС‹Рµ РЅР° РЅРѕРІС‹Рµ
 //
 //    void Ser() {
 //        ofile.open("SaveData.txt", ios::trunc);
@@ -173,7 +173,7 @@
 //            while (!ifile.eof()) {
 //                ifile >> str;
 //                for (int i = 0; i < 9; i++) {
-//                    ///определение объекта по его индексу и по экземляру стуктуры
+//                    ///РѕРїСЂРµРґРµР»РµРЅРёРµ РѕР±СЉРµРєС‚Р° РїРѕ РµРіРѕ РёРЅРґРµРєСЃСѓ Рё РїРѕ СЌРєР·РµРјР»СЏСЂСѓ СЃС‚СѓРєС‚СѓСЂС‹
 //                    if (!str.find(StructureArr[i]) &&
 //                        !str.find(StructureArr[i] + "index=")) {
 //                        ReplaceStructure(str, StructureArr[i]);

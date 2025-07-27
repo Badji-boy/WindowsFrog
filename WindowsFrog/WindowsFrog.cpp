@@ -1,19 +1,22 @@
 ﻿#include "Structures.h"
 #include "logick.h"
 #include "GameFileSystem.h"
-using namespace Gdiplus;
+
 #define MAX_LOADSTRING 100
 #pragma comment(lib, "GdiPlus.lib")
 // Global Variables:
-HINSTANCE hInst;                                // current instance
+HINSTANCE hInst; 
+HWND hWnd;
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
-
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+PAINTSTRUCT window;
+HDC hdc = BeginPaint(hWnd, &window);
+Graphics g(hdc);
 //-----------------------------------------------------------------------------------
 float lerp(float x1, float x2, float a)
 {
@@ -37,6 +40,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;
     GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+    InitGame();
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_WINDOWSFROG, szWindowClass, MAX_LOADSTRING);
@@ -58,6 +62,32 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
         {
             TranslateMessage(&msg);
+
+            location[player->currentLocation].hBack.showBack();
+
+            for (int i = 0; i < location[player->currentLocation].Persona.size(); i++) {
+
+                location[player->currentLocation].Persona[i]->Sprite.show();
+                location[player->currentLocation].Persona[i]->move();
+            }
+            player->Sprite.show();
+            player->move();
+            //Health_bar.Show();
+            for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
+                location[player->currentLocation].walls[i].Sprite.show();
+            }
+            for (int i = 0; i < location[player->currentLocation].healingFlask.size(); i++) {
+                location[player->currentLocation].healingFlask[i].Sprite.show();
+                location[player->currentLocation].healingFlask[i].healing(player, i);
+            }
+            for (int i = 0; i < location[player->currentLocation].spike.size(); i++) {
+                location[player->currentLocation].spike[i].Sprite.show();
+                location[player->currentLocation].spike[i].damage(player);
+            }
+            for (int i = 0; i < location[player->currentLocation].portal.size(); i++) {
+                location[player->currentLocation].portal[i].Sprite.show();
+                location[player->currentLocation].portal[i].Portal(player);
+            }
             DispatchMessage(&msg);
         }
     }
@@ -107,13 +137,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
       return FALSE;
    }
+   
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
@@ -121,21 +152,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
-void OnPaint(HDC hdc, const RECT& rc)
-{
-    // Создаем контекст рисования и устанавливаем 
-    // пиксельную систему координат
-    Graphics g(hdc);
-    g.SetPageUnit(UnitPixel);
-    RectF bounds(0, 0, float(rc.right), float(rc.bottom));
 
-    // Загружаем фоновое изображение и растягиваем его на все окно
-    Image bg(L"back.bmp");
-    g.DrawImage(&bg, bounds);
-    
-    //player = new Hero(0.2, 0.25, 0.023, 0.032, "racket", 40, 5, 3, rc, 0);
-    //player->Sprite.show(hdc, rc);
-}
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -147,7 +164,7 @@ void OnPaint(HDC hdc, const RECT& rc)
 //
 //
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
@@ -170,11 +187,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Add any drawing code that uses hdc here...
-            OnPaint(hdc, ps.rcPaint);
-            //player->Sprite.show(hdc, ps.rcPaint);
             
             EndPaint(hWnd, &ps);
             return 0;
