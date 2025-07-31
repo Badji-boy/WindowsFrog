@@ -12,6 +12,10 @@ float length(float x1, float y1, float x2, float y2)
 {
     return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 }
+bool isLevelLoaded = false;
+HDC hdcBuffer = NULL;
+HBITMAP hBitmap = NULL;
+int bufferWidth = 0, bufferHeight = 0;
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
@@ -59,6 +63,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
     }
+    
     GdiplusShutdown(gdiplusToken);
     return (int)msg.wParam;
 }
@@ -108,6 +113,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
+    SetTimer(hWnd, 1, 16, NULL); // ~60 FPS
+
     if (!hWnd)
     {
         return FALSE;
@@ -133,6 +140,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_TIMER:
+    {
+        InvalidateRect(hWnd, NULL, FALSE); // Перерисовываем окно
+    }
+    break;
     case WM_COMMAND:
     {
         int wmId = LOWORD(wParam);
@@ -150,47 +162,57 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
     }
     break;
-    case WM_KEYDOWN:
-    {
-        switch (wParam)
-        {
-        case VK_LEFT:  player->Sprite.dx = -player->Sprite.speed; break;
-        case VK_RIGHT: player->Sprite.dx = player->Sprite.speed; break;
-        case VK_SPACE: 
-            if(player->inJump == false && player->inJumpBot == false)
-            player->Sprite.jump = 110;
-            player->inJumpBot = true;
-            player->inJump = true; break;
-        }
-    }
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-        // TODO: Add any drawing code that uses hdc here...
-        LoadSVGDataMap(L"LVL0", ps.rcPaint);
-        location[player->currentLocation].hBack.showBack(hdc, ps.rcPaint);
+
+        RECT rc;
+        GetClientRect(hWnd, &rc);
+        if (!isLevelLoaded)
+        {
+            LoadSVGDataMap(L"LVL0", rc);
+            isLevelLoaded = true;
+        }
+        // Создаем буфер, если нужно
+        if (hdcBuffer == NULL || bufferWidth != rc.right || bufferHeight != rc.bottom)
+        {
+            if (hdcBuffer) DeleteDC(hdcBuffer);
+            if (hBitmap) DeleteObject(hBitmap);
+
+            hdcBuffer = CreateCompatibleDC(hdc);
+            bufferWidth = rc.right;
+            bufferHeight = rc.bottom;
+            hBitmap = CreateCompatibleBitmap(hdc, bufferWidth, bufferHeight);
+            SelectObject(hdcBuffer, hBitmap);
+        }
+
+        // Отрисовка в буфер
+        FillRect(hdcBuffer, &rc, (HBRUSH)(COLOR_WINDOW + 1));
+
+        
+        location[player->currentLocation].hBack.showBack(hdcBuffer, rc);
         for (int i = 0; i < location[player->currentLocation].Persona.size(); i++) {
 
-            location[player->currentLocation].Persona[i]->Sprite.show(hdc, ps.rcPaint);
+            location[player->currentLocation].Persona[i]->Sprite.show(hdcBuffer, rc);
             location[player->currentLocation].Persona[i]->move();
         }
-        player->Sprite.show(hdc, ps.rcPaint);
+        player->Sprite.show(hdcBuffer, rc);
         player->move();
         //Health_bar.Show();
         for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
-            location[player->currentLocation].walls[i].Sprite.show(hdc, ps.rcPaint);
+            location[player->currentLocation].walls[i].Sprite.show(hdcBuffer, rc);
         }
         for (int i = 0; i < location[player->currentLocation].healingFlask.size(); i++) {
-            location[player->currentLocation].healingFlask[i].Sprite.show(hdc, ps.rcPaint);
+            location[player->currentLocation].healingFlask[i].Sprite.show(hdcBuffer, rc);
             location[player->currentLocation].healingFlask[i].healing(player, i);
         }
         for (int i = 0; i < location[player->currentLocation].spike.size(); i++) {
-            location[player->currentLocation].spike[i].Sprite.show(hdc, ps.rcPaint);
+            location[player->currentLocation].spike[i].Sprite.show(hdcBuffer, rc);
             location[player->currentLocation].spike[i].damage(player);
         }
         for (int i = 0; i < location[player->currentLocation].portal.size(); i++) {
-            location[player->currentLocation].portal[i].Sprite.show(hdc, ps.rcPaint);
+            location[player->currentLocation].portal[i].Sprite.show(hdcBuffer, rc);
             location[player->currentLocation].portal[i].Portal(player);
         }
 
@@ -198,19 +220,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         ls = max(ls - .2, 0.1);
         ls = min(ls, 1);
 
-        float cameraHalfWidth = (ps.rcPaint.right / 2) / scale;
-        float cameraHalfHeight = (ps.rcPaint.bottom / 2) / scale;
+        float cameraHalfWidth = (rc.right / 2) / scale;
+        float cameraHalfHeight = (rc.bottom / 2) / scale;
 
         float targetX = player->Sprite.x;
         float targetY = player->Sprite.y;
 
         targetX = max(0 + cameraHalfWidth,
-            min(ps.rcPaint.right - cameraHalfWidth, targetX));
+            min(rc.right - cameraHalfWidth, targetX));
         targetY = max(0 + cameraHalfHeight,
-            min(ps.rcPaint.bottom - cameraHalfHeight, targetY));
+            min(rc.bottom - cameraHalfHeight, targetY));
 
         player_view.x = lerp(player_view.x, targetX, 0.1f);
         player_view.y = lerp(player_view.y, targetY, 0.1f);
+        BitBlt(hdc, 0, 0, bufferWidth, bufferHeight, hdcBuffer, 0, 0, SRCCOPY);
         EndPaint(hWnd, &ps);
     }
     break;

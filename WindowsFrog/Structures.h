@@ -33,7 +33,7 @@ struct float2 {
     float x;
     float y;
 };
-float scale = 0.5;
+float scale = 2;
 struct sprite {
     float x, y, width, height, dx, dy, speed, jump, gravity;
     Image* image;
@@ -294,8 +294,8 @@ Wolf* wolf2;
 //    sprite health_full, health_empty;
 //
 //    health_bar() {
-//        health_full.loadBitmapWithNativeSize("health_full");
-//        health_empty.loadBitmapWithNativeSize("health_empty");
+//        health_full.loadBitmapWithNativeSize(L"health_full");
+//        health_empty.loadBitmapWithNativeSize(L"health_empty");
 //    }
 //
 //    void Show() {
