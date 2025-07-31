@@ -5,7 +5,7 @@
 
 void InitGame()
 {
-    LoadSVGDataMap(L"testMap");
+    
 
     //player = new Hero(0.2, 0.25, 0.023, 0.032, "racket", 40, 5, 3, ,0);
     //wolf = new Wolf(0.25, 0.25, 0.023, 0.02, "enemy1", 40, 5, 3, 0);
@@ -84,7 +84,7 @@ void tracer_collide(auto& Character)
                 float pixel_x = Bbox[k * 2];
                 float pixel_y = Bbox[k * 2 + 1];
 
-                SetPixel(window.context, (pixel_x - player_view.x) * 2 + window.rcPaint.right / 2, (pixel_y - player_view.y) * 2 + window.rcPaint.bottom / 2, RGB(255, 255, 255));
+                //SetPixel(window.context, (pixel_x - player_view.x) * 2 + window.rcPaint.right / 2, (pixel_y - player_view.y) * 2 + window.rcPaint.bottom / 2, RGB(255, 255, 255));
 
 
 

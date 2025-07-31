@@ -11,8 +11,11 @@
 #include "resource.h"
 #include "framework.h"
 #include "gdiplus.h"
+#include "gdiplusgraphics.h"
+
 using namespace std;
 using namespace Gdiplus;
+
 int currenttime = 0;
 POINT mouse;
 
@@ -32,33 +35,34 @@ float scale = 2;
 struct sprite {
     float x, y, width, height, dx, dy, speed, jump, gravity;
     Image* image;
-
+    
     void loadBitmapWithNativeSize(const wstring& filename)
     {
         image = new Image(filename.c_str());
     }
 
-    void show()
+    void show(HDC hdc, const RECT& rc)
     {
-
+        Graphics g(hdc);
         
-        float vx = (x - player_view.x) * scale + window.rcPaint.right / 2;
-        float vy = (y - player_view.y) * scale + window.rcPaint.bottom / 2;
+        float vx = (x - player_view.x) * scale + rc.right / 2.;
+        float vy = (y - player_view.y) * scale + rc.bottom / 2.;
         float vw = width * scale;
         float vh = height * scale;
 
         bool in = false;
 
-        if (vx + vw >= 0 && vx < window.rcPaint.right &&
-            vy + vh >= 0 && vy < window.rcPaint.bottom)
+        if (vx + vw >= 0 && vx < rc.right &&
+            vy + vh >= 0 && vy < rc.bottom)
             in = true;
 
         if (!in) return;
         g.DrawImage(image, vx, vy, vw, vh);
     }
-    void showBack()
+    void showBack(HDC hdc, const RECT& rc)
     {
-        g.DrawImage(image, 0, 0, window.rcPaint.right, window.rcPaint.bottom);
+        Graphics g(hdc);
+        g.DrawImage(image, 0, 0, rc.right, rc.bottom);
     }
 
 };
@@ -67,12 +71,12 @@ class StaticObjects
 {
 public:
     sprite Sprite;
-    StaticObjects(float p_x, float p_y, float p_width, float p_height, const wstring& filename)
+    StaticObjects(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename)
     {
-        Sprite.x = p_x * window.rcPaint.right;
-        Sprite.y = p_y * window.rcPaint.bottom;
-        Sprite.width = p_width * window.rcPaint.right;
-        Sprite.height = p_height * window.rcPaint.bottom;
+        Sprite.x = p_x * rc.right;
+        Sprite.y = p_y * rc.bottom;
+        Sprite.width = p_width * rc.right;
+        Sprite.height = p_height * rc.bottom;
 
         Sprite.loadBitmapWithNativeSize(filename);
 
@@ -113,8 +117,8 @@ class portal_ : public StaticObjects
 {
 public:
     int destination;
-    portal_(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_destination)
-        : StaticObjects(p_x, p_y, p_width, p_height, filename)
+    portal_(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename, int p_destination)
+        : StaticObjects(p_x, p_y, p_width, p_height, rc, filename)
     {
         destination = p_destination;
     }
@@ -144,12 +148,12 @@ public:
     bool colis = false;
     bool dash_allow = true;
 
-    character(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives)
+    character(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename, int p_health, int p_max_lives, int p_current_lives)
     {
-        Sprite.x = p_x * window.rcPaint.right;
-        Sprite.y = p_y * window.rcPaint.bottom;
-        Sprite.width = p_width * window.rcPaint.right;
-        Sprite.height = p_height * window.rcPaint.bottom;
+        Sprite.x = p_x * rc.right;
+        Sprite.y = p_y * rc.bottom;
+        Sprite.width = p_width * rc.right;
+        Sprite.height = p_height * rc.bottom;
 
         Sprite.loadBitmapWithNativeSize(filename);
 
@@ -187,8 +191,8 @@ Location_ location[5];
 class Hero : public character
 {
 public:
-    Hero(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
-        : character(p_x, p_y, p_width, p_height, filename, p_health, p_max_lives, p_current_lives)
+    Hero(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
+        : character(p_x, p_y, p_width, p_height, rc, filename, p_health, p_max_lives, p_current_lives)
     {
 
         string name = __FUNCTION__;
@@ -233,8 +237,8 @@ class Wolf : public character //ñòðóêòóðà âðàãîâ
 public:
 
     int direction = 1; // 1 - âïðàâî, -1 - âëåâî
-    Wolf(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
-        : character(p_x, p_y, p_width, p_height, filename, p_health, p_max_lives, p_current_lives)
+    Wolf(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
+        : character(p_x, p_y, p_width, p_height, rc, filename, p_health, p_max_lives, p_current_lives)
     {
         Sprite.speed = 5;
         Sprite.dx = 0;

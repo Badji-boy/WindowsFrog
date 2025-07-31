@@ -8,7 +8,7 @@ wstring StrReplace(wstring* str, wstring namestr) {
 //новая фича создание, читалка файлов формата Svg и преобразование ее данных в игровой уровень 
 //создание карт можно делать в редакторе Adobe Photoshop (*2023 версия на которой я проверял)
 
-void LoadSVGDataMap(const wstring NameFileSVG) {
+void LoadSVGDataMap(const wstring NameFileSVG, const RECT& rc) {
     wifstream file;
 
     vector <vector<wstring>> dS{
@@ -92,34 +92,34 @@ void LoadSVGDataMap(const wstring NameFileSVG) {
     //загрузка уровня на основе собранных данных
     for (int i = 0; i < dS[0].size(); i++) {
         //интрепритация стоковых данных в числовые значения типа 0.1 от разрешения экрана пользователя
-        float x = stof(dS[1][i]) / window.rcPaint.right;
-        float y = stof(dS[2][i]) / window.rcPaint.bottom;
-        float width = stof(bufferData[0][i]) / window.rcPaint.right;
-        float height = stof(bufferData[1][i]) / window.rcPaint.bottom;
+        float x = stof(dS[1][i]) / rc.right;
+        float y = stof(dS[2][i]) / rc.bottom;
+        float width = stof(bufferData[0][i]) / rc.right;
+        float height = stof(bufferData[1][i]) / rc.bottom;
         wstring nameObject = dS[0][i];
 
 
         //создание объектов пока что только для уровня 0
         if (!nameObject.find(L"walls")) {
-            location[0].walls.emplace_back(x, y, width, height, "walls");
+            location[0].walls.emplace_back(x, y, width, height, rc, "walls");
         }
         else if (!nameObject.find(L"enemy")) {
-            wolf = new Wolf(x, y, width, height, L"enemy1", 40, 5, 3, 0);
+            wolf = new Wolf(x, y, width, height, rc, L"enemy1", 40, 5, 3, 0);
         }
         else if (!nameObject.find(L"racket")) {
-            player = new Hero(x, y, width, height, L"racket", 40, 5, 3, 0);
+            player = new Hero(x, y, width, height, rc, L"racket", 40, 5, 3, 0);
         }
         else if (!nameObject.find(L"background")) {
             location[0].hBack.loadBitmapWithNativeSize(nameObject);
         }
         else if (!nameObject.find(L"portal")) {
-            location[0].portal.emplace_back(x, y, width, height, L"racket", 1); // пока реализациия работает на переход на 1 уровень
+            location[0].portal.emplace_back(x, y, width, height, rc, L"racket", 1); // пока реализациия работает на переход на 1 уровень
         }
         else if (!nameObject.find(L"heal")) {
-            location[0].healingFlask.emplace_back(x, y, width, height, L"ball");
+            location[0].healingFlask.emplace_back(x, y, width, height, rc, L"ball");
         }
         else if (!nameObject.find(L"spike")) {
-            location[0].spike.emplace_back(x, y, width, height, L"spike");
+            location[0].spike.emplace_back(x, y, width, height, rc, L"spike");
         }
 
     }

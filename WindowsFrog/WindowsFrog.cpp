@@ -1,7 +1,6 @@
 ﻿#include "Structures.h"
 #include "logick.h"
 #include "GameFileSystem.h"
-
 #define MAX_LOADSTRING 100
 #pragma comment(lib, "GdiPlus.lib")
 // Global Variables:
@@ -14,9 +13,7 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-PAINTSTRUCT window;
-HDC hdc = BeginPaint(hWnd, &window);
-Graphics g(hdc);
+
 //-----------------------------------------------------------------------------------
 float lerp(float x1, float x2, float a)
 {
@@ -63,31 +60,31 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             TranslateMessage(&msg);
 
-            location[player->currentLocation].hBack.showBack();
+            
 
-            for (int i = 0; i < location[player->currentLocation].Persona.size(); i++) {
+            //for (int i = 0; i < location[player->currentLocation].Persona.size(); i++) {
 
-                location[player->currentLocation].Persona[i]->Sprite.show();
-                location[player->currentLocation].Persona[i]->move();
-            }
-            player->Sprite.show();
-            player->move();
-            //Health_bar.Show();
-            for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
-                location[player->currentLocation].walls[i].Sprite.show();
-            }
-            for (int i = 0; i < location[player->currentLocation].healingFlask.size(); i++) {
-                location[player->currentLocation].healingFlask[i].Sprite.show();
-                location[player->currentLocation].healingFlask[i].healing(player, i);
-            }
-            for (int i = 0; i < location[player->currentLocation].spike.size(); i++) {
-                location[player->currentLocation].spike[i].Sprite.show();
-                location[player->currentLocation].spike[i].damage(player);
-            }
-            for (int i = 0; i < location[player->currentLocation].portal.size(); i++) {
-                location[player->currentLocation].portal[i].Sprite.show();
-                location[player->currentLocation].portal[i].Portal(player);
-            }
+            //    location[player->currentLocation].Persona[i]->Sprite.show();
+            //    location[player->currentLocation].Persona[i]->move();
+            //}
+            //player->Sprite.show();
+            //player->move();
+            ////Health_bar.Show();
+            //for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
+            //    location[player->currentLocation].walls[i].Sprite.show();
+            //}
+            //for (int i = 0; i < location[player->currentLocation].healingFlask.size(); i++) {
+            //    location[player->currentLocation].healingFlask[i].Sprite.show();
+            //    location[player->currentLocation].healingFlask[i].healing(player, i);
+            //}
+            //for (int i = 0; i < location[player->currentLocation].spike.size(); i++) {
+            //    location[player->currentLocation].spike[i].Sprite.show();
+            //    location[player->currentLocation].spike[i].damage(player);
+            //}
+            //for (int i = 0; i < location[player->currentLocation].portal.size(); i++) {
+            //    location[player->currentLocation].portal[i].Sprite.show();
+            //    location[player->currentLocation].portal[i].Portal(player);
+            //}
             DispatchMessage(&msg);
         }
     }
@@ -152,7 +149,11 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
-
+void OnPaint(HDC hdc, const RECT& rc)
+{
+    //Graphics g(hdc);
+    //location[player->currentLocation].hBack.showBack(hdc, rc);
+}
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -187,9 +188,14 @@ LRESULT CALLBACK WndProc(UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
-            
-            EndPaint(hWnd, &ps);
-            return 0;
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+       
+        //OnPaint(hdc, ps.rcPaint);
+        LoadSVGDataMap(L"testMap", ps.rcPaint);
+        
+        EndPaint(hWnd, &ps);
+        return 0;
         }
         break;
     case WM_DESTROY:
