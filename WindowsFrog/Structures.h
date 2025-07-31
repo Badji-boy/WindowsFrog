@@ -12,6 +12,8 @@
 #include "framework.h"
 #include "gdiplus.h"
 #include "gdiplusgraphics.h"
+#include <shlwapi.h> // Для PathFileExists
+#pragma comment(lib, "shlwapi.lib")
 
 using namespace std;
 using namespace Gdiplus;
@@ -31,14 +33,23 @@ struct float2 {
     float x;
     float y;
 };
-float scale = 2;
+float scale = 0.5;
 struct sprite {
     float x, y, width, height, dx, dy, speed, jump, gravity;
     Image* image;
-    
     void loadBitmapWithNativeSize(const wstring& filename)
     {
-        image = new Image(filename.c_str());
+        const wstring s = filename + L".bmp";
+        image = new Image(s.c_str());
+    
+        //image = new Image(L"back.bmp");
+        if (image->GetLastStatus() != Ok)
+        {
+            // Обработка ошибки загрузки
+            delete image;
+            image = nullptr;
+            MessageBox(NULL, "Не удалось загрузить изображение", "Ошибка", MB_ICONERROR);
+        }
     }
 
     void show(HDC hdc, const RECT& rc)

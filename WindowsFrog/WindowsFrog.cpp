@@ -1,20 +1,8 @@
 ﻿#include "Structures.h"
 #include "logick.h"
 #include "GameFileSystem.h"
-#define MAX_LOADSTRING 100
 #pragma comment(lib, "GdiPlus.lib")
-// Global Variables:
-HINSTANCE hInst; 
-HWND hWnd;
-WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
-WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
-// Forward declarations of functions included in this code module:
-ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-
-//-----------------------------------------------------------------------------------
+#define MAX_LOADSTRING 100
 float lerp(float x1, float x2, float a)
 {
     return x1 * (1 - a) + x2 * a;
@@ -24,11 +12,21 @@ float length(float x1, float y1, float x2, float y2)
 {
     return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 }
+// Global Variables:
+HINSTANCE hInst;                                // current instance
+WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
+WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+
+// Forward declarations of functions included in this code module:
+ATOM                MyRegisterClass(HINSTANCE hInstance);
+BOOL                InitInstance(HINSTANCE, int);
+LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPWSTR    lpCmdLine,
+    _In_ int       nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
@@ -37,14 +35,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;
     GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-    InitGame();
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_WINDOWSFROG, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
     // Perform application initialization:
-    if (!InitInstance (hInstance, nCmdShow))
+    if (!InitInstance(hInstance, nCmdShow))
     {
         return FALSE;
     }
@@ -59,37 +56,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
         {
             TranslateMessage(&msg);
-
-            
-
-            //for (int i = 0; i < location[player->currentLocation].Persona.size(); i++) {
-
-            //    location[player->currentLocation].Persona[i]->Sprite.show();
-            //    location[player->currentLocation].Persona[i]->move();
-            //}
-            //player->Sprite.show();
-            //player->move();
-            ////Health_bar.Show();
-            //for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
-            //    location[player->currentLocation].walls[i].Sprite.show();
-            //}
-            //for (int i = 0; i < location[player->currentLocation].healingFlask.size(); i++) {
-            //    location[player->currentLocation].healingFlask[i].Sprite.show();
-            //    location[player->currentLocation].healingFlask[i].healing(player, i);
-            //}
-            //for (int i = 0; i < location[player->currentLocation].spike.size(); i++) {
-            //    location[player->currentLocation].spike[i].Sprite.show();
-            //    location[player->currentLocation].spike[i].damage(player);
-            //}
-            //for (int i = 0; i < location[player->currentLocation].portal.size(); i++) {
-            //    location[player->currentLocation].portal[i].Sprite.show();
-            //    location[player->currentLocation].portal[i].Portal(player);
-            //}
             DispatchMessage(&msg);
         }
     }
     GdiplusShutdown(gdiplusToken);
-    return (int) msg.wParam;
+    return (int)msg.wParam;
 }
 
 
@@ -105,17 +76,17 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
     wcex.cbSize = sizeof(WNDCLASSEX);
 
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_WINDOWSFROG));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_WINDOWSFROG);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_WINDOWSFROG));
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_WINDOWSFROG);
+    wcex.lpszClassName = szWindowClass;
+    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
 }
@@ -132,28 +103,22 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // Store instance handle in our global variable
+    hInst = hInstance; // Store instance handle in our global variable
 
-   hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
-   
+    if (!hWnd)
+    {
+        return FALSE;
+    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
 
-   return TRUE;
+    return TRUE;
 }
 
-void OnPaint(HDC hdc, const RECT& rc)
-{
-    //Graphics g(hdc);
-    //location[player->currentLocation].hBack.showBack(hdc, rc);
-}
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -164,40 +129,91 @@ void OnPaint(HDC hdc, const RECT& rc)
 //  WM_DESTROY  - post a quit message and return
 //
 //
-
-LRESULT CALLBACK WndProc(UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
     case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+        // Parse the menu selections:
+        switch (wmId)
         {
-            int wmId = LOWORD(wParam);
-            // Parse the menu selections:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
         }
-        break;
-    case WM_PAINT:
+    }
+    break;
+    case WM_KEYDOWN:
+    {
+        switch (wParam)
         {
+        case VK_LEFT:  player->Sprite.dx = -player->Sprite.speed; break;
+        case VK_RIGHT: player->Sprite.dx = player->Sprite.speed; break;
+        case VK_SPACE: 
+            if(player->inJump == false && player->inJumpBot == false)
+            player->Sprite.jump = 110;
+            player->inJumpBot = true;
+            player->inJump = true; break;
+        }
+    }
+    case WM_PAINT:
+    {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-       
-        //OnPaint(hdc, ps.rcPaint);
-        LoadSVGDataMap(L"testMap", ps.rcPaint);
-        
-        EndPaint(hWnd, &ps);
-        return 0;
+        // TODO: Add any drawing code that uses hdc here...
+        LoadSVGDataMap(L"LVL0", ps.rcPaint);
+        location[player->currentLocation].hBack.showBack(hdc, ps.rcPaint);
+        for (int i = 0; i < location[player->currentLocation].Persona.size(); i++) {
+
+            location[player->currentLocation].Persona[i]->Sprite.show(hdc, ps.rcPaint);
+            location[player->currentLocation].Persona[i]->move();
         }
-        break;
+        player->Sprite.show(hdc, ps.rcPaint);
+        player->move();
+        //Health_bar.Show();
+        for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
+            location[player->currentLocation].walls[i].Sprite.show(hdc, ps.rcPaint);
+        }
+        for (int i = 0; i < location[player->currentLocation].healingFlask.size(); i++) {
+            location[player->currentLocation].healingFlask[i].Sprite.show(hdc, ps.rcPaint);
+            location[player->currentLocation].healingFlask[i].healing(player, i);
+        }
+        for (int i = 0; i < location[player->currentLocation].spike.size(); i++) {
+            location[player->currentLocation].spike[i].Sprite.show(hdc, ps.rcPaint);
+            location[player->currentLocation].spike[i].damage(player);
+        }
+        for (int i = 0; i < location[player->currentLocation].portal.size(); i++) {
+            location[player->currentLocation].portal[i].Sprite.show(hdc, ps.rcPaint);
+            location[player->currentLocation].portal[i].Portal(player);
+        }
+
+        float ls = .2 * length(player_view.x, player->Sprite.x, player_view.y, player->Sprite.y) / 500.;
+        ls = max(ls - .2, 0.1);
+        ls = min(ls, 1);
+
+        float cameraHalfWidth = (ps.rcPaint.right / 2) / scale;
+        float cameraHalfHeight = (ps.rcPaint.bottom / 2) / scale;
+
+        float targetX = player->Sprite.x;
+        float targetY = player->Sprite.y;
+
+        targetX = max(0 + cameraHalfWidth,
+            min(ps.rcPaint.right - cameraHalfWidth, targetX));
+        targetY = max(0 + cameraHalfHeight,
+            min(ps.rcPaint.bottom - cameraHalfHeight, targetY));
+
+        player_view.x = lerp(player_view.x, targetX, 0.1f);
+        player_view.y = lerp(player_view.y, targetY, 0.1f);
+        EndPaint(hWnd, &ps);
+    }
+    break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
@@ -226,3 +242,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return (INT_PTR)FALSE;
 }
+

@@ -142,8 +142,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\x64\Debug\back.bmp" />
+    <Image Include="background_0.bmp" />
     <Image Include="small.ico" />
     <Image Include="WindowsFrog.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="LVL0.svg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

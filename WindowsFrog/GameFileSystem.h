@@ -101,7 +101,7 @@ void LoadSVGDataMap(const wstring NameFileSVG, const RECT& rc) {
 
         //создание объектов пока что только для уровня 0
         if (!nameObject.find(L"walls")) {
-            location[0].walls.emplace_back(x, y, width, height, rc, "walls");
+            location[0].walls.emplace_back(x, y, width, height, rc, L"walls");
         }
         else if (!nameObject.find(L"enemy")) {
             wolf = new Wolf(x, y, width, height, rc, L"enemy1", 40, 5, 3, 0);
