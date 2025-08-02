@@ -33,7 +33,7 @@ struct float2 {
     float x;
     float y;
 };
-float scale = 2;
+float scale = 3;
 struct sprite {
     float x, y, width, height, dx, dy, speed, jump, gravity;
     Image* image;
@@ -42,14 +42,13 @@ struct sprite {
         const wstring s = filename + L".bmp";
         image = new Image(s.c_str());
     
-        //image = new Image(L"back.bmp");
-        if (image->GetLastStatus() != Ok)
-        {
-            // Обработка ошибки загрузки
-            delete image;
-            image = nullptr;
-            MessageBox(NULL, "Не удалось загрузить изображение", "Ошибка", MB_ICONERROR);
-        }
+        //if (image->GetLastStatus() != Ok)
+        //{
+        //    // Обработка ошибки загрузки
+        //    delete image;
+        //    image = nullptr;
+        //    MessageBox(NULL, "Не удалось загрузить изображение", "Ошибка", MB_ICONERROR);
+        //}
     }
 
     void show(HDC hdc, const RECT& rc)
@@ -288,38 +287,38 @@ Hero* player;
 Wolf* wolf;
 Wolf* wolf2;
 
+class health_bar {
+public:
+    sprite health_full, health_empty;
+    
+    health_bar() {
+        health_full.loadBitmapWithNativeSize(L"health_full");
+        health_empty.loadBitmapWithNativeSize(L"health_empty");
+    }
 
-//class health_bar {
-//public:
-//    sprite health_full, health_empty;
-//
-//    health_bar() {
-//        health_full.loadBitmapWithNativeSize(L"health_full");
-//        health_empty.loadBitmapWithNativeSize(L"health_empty");
-//    }
-//
-//    void Show() {
-//
-//        int h_w = 50;
-//        int margin = 10;
-//        int startX = window.width - h_w - 20;
-//        int startY = 10;
-//
-//        for (int i = 0; i < player->max_lives; i++) {
-//            if (i < player->current_lives) {
-//                ShowBitmap(window.context, startX - (i * (h_w + margin)), startY, h_w, h_w, health_full.hBitmap, false);
-//
-//            }
-//            else {
-//                ShowBitmap(window.context, startX - (i * (h_w + margin)), startY, h_w, h_w, health_empty.hBitmap, false);
-//
-//            }
-//        }
-//    }
-//
-//};
-//
-//health_bar Health_bar;
+    void Show(HDC hdc, const RECT& rc) {
+
+        Graphics g(hdc);
+        int h_w = 50;
+        int margin = 10;
+        int startX = rc.right - h_w - 20;
+        int startY = 10;
+
+        for (int i = 0; i < player->max_lives; i++) {
+            if (i < player->current_lives) {
+                //ShowBitmap(window.context, startX - (i * (h_w + margin)), startY, h_w, h_w, health_full.hBitmap, false);
+                g.DrawImage(health_full.image, startX - (i * (h_w + margin)), startY, h_w, h_w);
+            }
+            else {
+                //ShowBitmap(window.context, startX - (i * (h_w + margin)), startY, h_w, h_w, health_empty.hBitmap, false);
+                g.DrawImage(health_empty.image, startX - (i * (h_w + margin)), startY, h_w, h_w);
+            }
+        }
+    }
+
+};
+
+health_bar Health_bar;
 
 void portal_::Portal(auto& player)
 {
@@ -355,11 +354,12 @@ void Spike::damage(auto& player)
         spikeCollision = true;
 
     }
-    if (spikeCollision && currenttime > lastDamageTime + 1000) {
+    if (spikeCollision /*&& currenttime > lastDamageTime + 1000*/) {
         player->current_lives--;
         lastDamageTime = currenttime;
         player->Sprite.jump = 60;
         player->Sprite.x += 20;
         player->inJump = true;
+       // SetTimer(hWnd, 1, 1000, NULL);
     }
 }

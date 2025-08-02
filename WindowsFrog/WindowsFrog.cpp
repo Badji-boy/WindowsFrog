@@ -174,6 +174,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             LoadSVGDataMap(L"LVL0", rc);
             isLevelLoaded = true;
         }
+        
         // Создаем буфер, если нужно
         if (hdcBuffer == NULL || bufferWidth != rc.right || bufferHeight != rc.bottom)
         {
@@ -199,7 +200,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         player->Sprite.show(hdcBuffer, rc);
         player->move();
-        //Health_bar.Show();
+        Health_bar.Show(hdcBuffer, rc);
         for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
             location[player->currentLocation].walls[i].Sprite.show(hdcBuffer, rc);
         }
