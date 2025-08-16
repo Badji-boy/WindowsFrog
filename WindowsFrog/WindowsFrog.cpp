@@ -164,10 +164,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     break;
     case WM_PAINT:
     {
+        FontFamily  fontFamily(L"Times New Roman");
+        Font        font(&fontFamily, 24, FontStyleRegular, UnitPixel);
+        SolidBrush  solidBrush(Color(255, 0, 0, 255));
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-
         RECT rc;
+        Graphics g(hdc);
+        
         GetClientRect(hWnd, &rc);
         if (!isLevelLoaded)
         {
@@ -197,10 +201,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             location[player->currentLocation].Persona[i]->Sprite.show(hdcBuffer, rc);
             location[player->currentLocation].Persona[i]->move();
+            location[player->currentLocation].Persona[i]->dialog(player);
         }
         player->Sprite.show(hdcBuffer, rc);
         player->move();
-        Health_bar.Show(hdcBuffer, rc);
+        //Health_bar.Show(hdcBuffer, rc);
         for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
             location[player->currentLocation].walls[i].Sprite.show(hdcBuffer, rc);
         }
@@ -216,6 +221,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             location[player->currentLocation].portal[i].Sprite.show(hdcBuffer, rc);
             location[player->currentLocation].portal[i].Portal(player);
         }
+
+
+        if (dialogCollision == true)
+        {
+            
+            float txtX = location[player->currentLocation].Persona[name]->DialogSprite.x;
+            float txtY = location[player->currentLocation].Persona[name]->DialogSprite.y;
+            location[player->currentLocation].Persona[name]->DialogSprite.show(hdcBuffer, rc);
+            PointF txtBounds(txtX, txtY);
+            g.DrawString(L"Hello", -1, &font, txtBounds, &solidBrush);
+
+        }
+        
+
 
         float ls = .2 * length(player_view.x, player->Sprite.x, player_view.y, player->Sprite.y) / 500.;
         ls = max(ls - .2, 0.1);

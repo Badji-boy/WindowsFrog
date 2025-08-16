@@ -20,7 +20,8 @@ using namespace Gdiplus;
 
 int currenttime = 0;
 POINT mouse;
-
+bool dialogCollision = false;
+int name;
 struct {
     int x = 0;
     int y = 0;
@@ -76,6 +77,14 @@ struct sprite {
     }
 
 };
+bool CheckCollision(float x1, float y1, float w1, float h1,
+    float x2, float y2, float w2, float h2)
+{
+    return x1 < x2 + w2 &&
+        x1 + w1 > x2 &&
+        y1 < y2 + h2 &&
+        y1 + h1 > y2;
+}
 
 class StaticObjects
 {
@@ -90,15 +99,6 @@ public:
 
         Sprite.loadBitmapWithNativeSize(filename);
 
-    }
-
-    bool CheckCollision(float x1, float y1, float w1, float h1,
-        float x2, float y2, float w2, float h2)
-    {
-        return x1 < x2 + w2 &&
-            x1 + w1 > x2 &&
-            y1 < y2 + h2 &&
-            y1 + h1 > y2;
     }
 };
 
@@ -144,6 +144,7 @@ class character
 {
 public:
     sprite Sprite;
+    sprite DialogSprite;
     int health_width;
     int max_lives;
     int current_lives;
@@ -164,14 +165,20 @@ public:
         Sprite.y = p_y * rc.bottom;
         Sprite.width = p_width * rc.right;
         Sprite.height = p_height * rc.bottom;
+        DialogSprite.x = p_x * rc.right + 50;
+        DialogSprite.y = p_y * rc.bottom - 50;
+        DialogSprite.width = p_width * rc.right + 50;
+        DialogSprite.height = p_height * rc.bottom - 10;
 
         Sprite.loadBitmapWithNativeSize(filename);
+        DialogSprite.loadBitmapWithNativeSize(L"dialog");
 
         health_width = p_health;
         max_lives = p_max_lives;
         current_lives = p_current_lives;
     }
-
+   
+    void dialog(auto& player);
     virtual void move() = 0;
 
 };
@@ -219,15 +226,15 @@ public:
 
     void move()
     {
-        if (GetAsyncKeyState(VK_LEFT)) {
+        if (GetAsyncKeyState(VK_LEFT) && dialogCollision == false) {
             Sprite.dx = -Sprite.speed;
         }
 
-        if (GetAsyncKeyState(VK_RIGHT)) {
+        if (GetAsyncKeyState(VK_RIGHT) && dialogCollision == false) {
             Sprite.dx = Sprite.speed;
         }
 
-        if (GetAsyncKeyState(VK_SPACE) && inJump == false && inJumpBot == false)
+        if (GetAsyncKeyState(VK_SPACE) && inJump == false && inJumpBot == false && dialogCollision == false)
         {
             Sprite.jump = 110;
             inJumpBot = true;
@@ -237,16 +244,16 @@ public:
         tracer_collide(*this);
 
         processGravity(Sprite);
-
-
     }
+    
 };
 
 class Wolf : public character //ñòðóêòóðà âðàãîâ
 {
 public:
 
-    int direction = 1; // 1 - âïðàâî, -1 - âëåâî
+    int direction = 1;
+    
     Wolf(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
         : character(p_x, p_y, p_width, p_height, rc, filename, p_health, p_max_lives, p_current_lives)
     {
@@ -264,7 +271,7 @@ public:
 
         processGravity(Sprite);
 
-        if (last_trace_platform_num >= 0)
+       /* if (last_trace_platform_num >= 0)
         {
             if (Sprite.x <= location[currentLocation].walls[last_trace_platform_num].Sprite.x)
             {
@@ -277,8 +284,10 @@ public:
                 direction = -1;
             }
             Sprite.dx = direction * Sprite.speed;
-        }
+        }*/
     }
+    
+    
 };
 
 
@@ -287,38 +296,38 @@ Hero* player;
 Wolf* wolf;
 Wolf* wolf2;
 
-class health_bar {
-public:
-    sprite health_full, health_empty;
-    
-    health_bar() {
-        health_full.loadBitmapWithNativeSize(L"health_full");
-        health_empty.loadBitmapWithNativeSize(L"health_empty");
-    }
-
-    void Show(HDC hdc, const RECT& rc) {
-
-        Graphics g(hdc);
-        int h_w = 50;
-        int margin = 10;
-        int startX = rc.right - h_w - 20;
-        int startY = 10;
-
-        for (int i = 0; i < player->max_lives; i++) {
-            if (i < player->current_lives) {
-                //ShowBitmap(window.context, startX - (i * (h_w + margin)), startY, h_w, h_w, health_full.hBitmap, false);
-                g.DrawImage(health_full.image, startX - (i * (h_w + margin)), startY, h_w, h_w);
-            }
-            else {
-                //ShowBitmap(window.context, startX - (i * (h_w + margin)), startY, h_w, h_w, health_empty.hBitmap, false);
-                g.DrawImage(health_empty.image, startX - (i * (h_w + margin)), startY, h_w, h_w);
-            }
-        }
-    }
-
-};
-
-health_bar Health_bar;
+//class health_bar {
+//public:
+//    sprite health_full, health_empty;
+//    
+//    health_bar() {
+//        health_full.loadBitmapWithNativeSize(L"health_full");
+//        health_empty.loadBitmapWithNativeSize(L"health_empty");
+//    }
+//
+//    void Show(HDC hdc, const RECT& rc) {
+//
+//        Graphics g(hdc);
+//        int h_w = 50;
+//        int margin = 10;
+//        int startX = rc.right - h_w - 20;
+//        int startY = 10;
+//
+//        for (int i = 0; i < player->max_lives; i++) {
+//            if (i < player->current_lives) {
+//                ShowBitmap(window.context, startX - (i * (h_w + margin)), startY, h_w, h_w, health_full.hBitmap, false);
+//                g.DrawImage(health_full.image, startX - (i * (h_w + margin)), startY, h_w, h_w);
+//            }
+//            else {
+//                ShowBitmap(window.context, startX - (i * (h_w + margin)), startY, h_w, h_w, health_empty.hBitmap, false);
+//                g.DrawImage(health_empty.image, startX - (i * (h_w + margin)), startY, h_w, h_w);
+//            }
+//        }
+//    }
+//
+//};
+//
+//health_bar Health_bar;
 
 void portal_::Portal(auto& player)
 {
@@ -361,5 +370,14 @@ void Spike::damage(auto& player)
         player->Sprite.x += 20;
         player->inJump = true;
        // SetTimer(hWnd, 1, 1000, NULL);
+    }
+}
+void character::dialog(auto& player)
+{
+    
+    if (CheckCollision(player->Sprite.x, player->Sprite.y, player->Sprite.width, player->Sprite.height, Sprite.x, Sprite.y, Sprite.width, Sprite.height))
+    {
+        dialogCollision = true;
+        name++;
     }
 }

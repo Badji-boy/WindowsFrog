@@ -57,6 +57,9 @@
     <Image Include="background_0.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="dialog.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="LVL0.svg">

@@ -143,6 +143,7 @@
   <ItemGroup>
     <Image Include="..\x64\Debug\back.bmp" />
     <Image Include="background_0.bmp" />
+    <Image Include="dialog.bmp" />
     <Image Include="small.ico" />
     <Image Include="WindowsFrog.ico" />
   </ItemGroup>
