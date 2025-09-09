@@ -17,63 +17,123 @@
 
 using namespace std;
 using namespace Gdiplus;
+HDC hdc;
 
 int currenttime = 0;
 POINT mouse;
 bool dialogCollision = false;
 int name;
-struct {
+struct
+{
+    HWND hWnd;//хэндл окна
+    HDC device_context, context;// два контекста устройства (для буферизации)
+    int width = GetSystemMetrics(SM_CXSCREEN), height = GetSystemMetrics(SM_CYSCREEN);//сюда сохраним размеры окна которое создаст программа
+} window;
+
+struct
+{
     int x = 0;
     int y = 0;
     int w;
     int h;
-
 } player_view;
-
-struct float2 {
-    float x;
-    float y;
+static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (msg)
+    {
+    case WM_CLOSE:
+        PostQuitMessage(0);
+        break;
+    default:
+        return DefWindowProc(hWnd, msg, wParam, lParam);
+    }
 };
-float scale = 3;
+class Window
+{
+private:
+    const char* NameClass = "Window";
+    RECT rc;
+    HINSTANCE hIns;
+    HWND hWnd;
+    PAINTSTRUCT ps;
+public:
+    Window(int Width, int Height, const char* NameWind)
+    {
+        rc = { 0,0,Width,Height
+        };
+
+        AdjustWindowRect(&rc, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
+
+        WNDCLASSEX wc = { 0 };
+        wc.cbSize = sizeof(wc);
+        wc.lpszClassName = NameClass;
+        wc.hInstance = hIns;
+        wc.lpfnWndProc = &WindowProc;
+
+        auto NameClassId = RegisterClassEx(&wc);
+
+        hWnd = CreateWindowEx(
+            NULL,
+            MAKEINTATOM(NameClassId),
+            NameWind,
+            WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            rc.right - rc.left,
+            rc.bottom - rc.top,
+            NULL,
+            NULL,
+            hIns,
+            NULL
+        );
+        hdc = BeginPaint(hWnd, &ps);
+        ShowWindow(hWnd, SW_SHOW);
+        EndPaint(hWnd, &ps);
+    };
+   /* ~Window()
+    {
+        DestroyWindow(hWnd);
+    };*/
+
+    HWND GetHWND()
+    {
+        return hWnd;
+    }
+}win(window.width, window.height, "GameFrog");
+
+
+
+float scale = 0.5;
 struct sprite {
     float x, y, width, height, dx, dy, speed, jump, gravity;
     Image* image;
+
     void loadBitmapWithNativeSize(const wstring& filename)
     {
         const wstring s = filename + L".bmp";
         image = new Image(s.c_str());
-    
-        //if (image->GetLastStatus() != Ok)
-        //{
-        //    // Обработка ошибки загрузки
-        //    delete image;
-        //    image = nullptr;
-        //    MessageBox(NULL, "Не удалось загрузить изображение", "Ошибка", MB_ICONERROR);
-        //}
     }
 
-    void show(HDC hdc, const RECT& rc)
+    void show()
     {
-        Graphics g(hdc);
-        
-        float vx = (x - player_view.x) * scale + rc.right / 2.;
-        float vy = (y - player_view.y) * scale + rc.bottom / 2.;
+        float vx = (x - player_view.x) * scale + window.width / 2.;
+        float vy = (y - player_view.y) * scale + window.height / 2.;
         float vw = width * scale;
         float vh = height * scale;
 
         bool in = false;
 
-        if (vx + vw >= 0 && vx < rc.right &&
-            vy + vh >= 0 && vy < rc.bottom)
+        if (vx + vw >= 0 && vx < window.width &&
+            vy + vh >= 0 && vy < window.height)
             in = true;
 
         if (!in) return;
         g.DrawImage(image, vx, vy, vw, vh);
     }
-    void showBack(HDC hdc, const RECT& rc)
+    void showBack()
     {
         Graphics g(hdc);
-        g.DrawImage(image, 0, 0, rc.right, rc.bottom);
+        g.DrawImage(image, 0, 0, window.width, window.height);
     }
 
 };
@@ -90,12 +150,12 @@ class StaticObjects
 {
 public:
     sprite Sprite;
-    StaticObjects(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename)
+    StaticObjects(float p_x, float p_y, float p_width, float p_height, const wstring& filename)
     {
-        Sprite.x = p_x * rc.right;
-        Sprite.y = p_y * rc.bottom;
-        Sprite.width = p_width * rc.right;
-        Sprite.height = p_height * rc.bottom;
+        Sprite.x = p_x * window.width;
+        Sprite.y = p_y * window.height;
+        Sprite.width = p_width * window.width;
+        Sprite.height = p_height * window.height;
 
         Sprite.loadBitmapWithNativeSize(filename);
 
@@ -127,8 +187,8 @@ class portal_ : public StaticObjects
 {
 public:
     int destination;
-    portal_(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename, int p_destination)
-        : StaticObjects(p_x, p_y, p_width, p_height, rc, filename)
+    portal_(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_destination)
+        : StaticObjects(p_x, p_y, p_width, p_height, filename)
     {
         destination = p_destination;
     }
@@ -159,16 +219,16 @@ public:
     bool colis = false;
     bool dash_allow = true;
 
-    character(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename, int p_health, int p_max_lives, int p_current_lives)
+    character(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives)
     {
-        Sprite.x = p_x * rc.right;
-        Sprite.y = p_y * rc.bottom;
-        Sprite.width = p_width * rc.right;
-        Sprite.height = p_height * rc.bottom;
-        DialogSprite.x = p_x * rc.right + 50;
-        DialogSprite.y = p_y * rc.bottom - 50;
-        DialogSprite.width = p_width * rc.right + 50;
-        DialogSprite.height = p_height * rc.bottom - 10;
+        Sprite.x = p_x * window.width;
+        Sprite.y = p_y * window.height;
+        Sprite.width = p_width * window.width;
+        Sprite.height = p_height * window.height;
+        DialogSprite.x = p_x * window.width + 50;
+        DialogSprite.y = p_y * window.height - 50;
+        DialogSprite.width = p_width * window.width + 50;
+        DialogSprite.height = p_height * window.height - 10;
 
         Sprite.loadBitmapWithNativeSize(filename);
         DialogSprite.loadBitmapWithNativeSize(L"dialog");
@@ -208,8 +268,8 @@ Location_ location[5];
 class Hero : public character
 {
 public:
-    Hero(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
-        : character(p_x, p_y, p_width, p_height, rc, filename, p_health, p_max_lives, p_current_lives)
+    Hero(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
+        : character(p_x, p_y, p_width, p_height, filename, p_health, p_max_lives, p_current_lives)
     {
 
         string name = __FUNCTION__;
@@ -254,8 +314,8 @@ public:
 
     int direction = 1;
     
-    Wolf(float p_x, float p_y, float p_width, float p_height, const RECT& rc, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
-        : character(p_x, p_y, p_width, p_height, rc, filename, p_health, p_max_lives, p_current_lives)
+    Wolf(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
+        : character(p_x, p_y, p_width, p_height, filename, p_health, p_max_lives, p_current_lives)
     {
         Sprite.speed = 5;
         Sprite.dx = 0;
