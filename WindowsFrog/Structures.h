@@ -25,8 +25,7 @@ bool dialogCollision = false;
 int name;
 struct
 {
-    HWND hWnd;//хэндл окна
-    HDC device_context, context;// два контекста устройства (для буферизации)
+    HDC context;
     int width = GetSystemMetrics(SM_CXSCREEN), height = GetSystemMetrics(SM_CYSCREEN);//сюда сохраним размеры окна которое создаст программа
 } window;
 
@@ -86,9 +85,12 @@ public:
             hIns,
             NULL
         );
-        hdc = BeginPaint(hWnd, &ps);
+
+        hdc = GetDC(hWnd);
+        window.context = CreateCompatibleDC(hdc);
+        SelectObject(window.context, CreateCompatibleBitmap(hdc, window.width, window.height));
         ShowWindow(hWnd, SW_SHOW);
-        EndPaint(hWnd, &ps);
+        
     };
    /* ~Window()
     {
@@ -103,7 +105,7 @@ public:
 
 
 
-float scale = 0.5;
+float scale = 2;
 struct sprite {
     float x, y, width, height, dx, dy, speed, jump, gravity;
     Image* image;
@@ -114,8 +116,9 @@ struct sprite {
         image = new Image(s.c_str());
     }
 
-    void show()
+    void show(Graphics& g)
     {
+        //Graphics g(window.context);
         float vx = (x - player_view.x) * scale + window.width / 2.;
         float vy = (y - player_view.y) * scale + window.height / 2.;
         float vw = width * scale;
@@ -130,9 +133,9 @@ struct sprite {
         if (!in) return;
         g.DrawImage(image, vx, vy, vw, vh);
     }
-    void showBack()
+    void showBack(Graphics& g)
     {
-        Graphics g(hdc);
+        //Graphics g(window.context);
         g.DrawImage(image, 0, 0, window.width, window.height);
     }
 
@@ -259,6 +262,7 @@ struct Location_
     vector<HealingFlask> healingFlask;
     vector<Spike> spike;
     vector<character*> Persona;
+    vector<character*> dialog;
 
 };
 

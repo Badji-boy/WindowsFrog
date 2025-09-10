@@ -5,15 +5,7 @@
 
 #pragma comment(lib, "GdiPlus.lib")
 #define MAX_LOADSTRING 100
-float lerp(float x1, float x2, float a)
-{
-    return x1 * (1 - a) + x2 * a;
-}
 
-float length(float x1, float y1, float x2, float y2)
-{
-    return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
-}
 bool isLevelLoaded = false;
 
 int CALLBACK WinMain(
@@ -32,13 +24,3 @@ int CALLBACK WinMain(
 };
 
 
-//if (dialogCollision == true)
-//{
-//
-//    float txtX = location[player->currentLocation].Persona[name]->DialogSprite.x;
-//    float txtY = location[player->currentLocation].Persona[name]->DialogSprite.y;
-//    location[player->currentLocation].Persona[name]->DialogSprite.show(hdcBuffer);
-//    PointF txtBounds(txtX, txtY);
-//    g.DrawString(L"Hello", -1, &font, txtBounds, &solidBrush);
-//
-//}

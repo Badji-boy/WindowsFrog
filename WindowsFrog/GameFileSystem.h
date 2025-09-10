@@ -121,7 +121,7 @@ void LoadSVGDataMap(const wstring NameFileSVG) {
         else if (!nameObject.find(L"spike")) {
             location[0].spike.emplace_back(x, y, width, height, L"spike");
         }
-
+        location[0].dialog.emplace_back(x, y, width, height, L"dialog");
     }
     file.close();
 }
