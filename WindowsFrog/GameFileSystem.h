@@ -104,10 +104,10 @@ void LoadSVGDataMap(const wstring NameFileSVG) {
             location[0].walls.emplace_back(x, y, width, height, L"walls");
         }
         else if (!nameObject.find(L"enemy")) {
-            wolf = new Wolf(x, y, width, height, L"enemy1", 40, 5, 3, 0);
+            wolf = new Wolf(x, y, width, height, L"enemy1", 40, 5, 3, name++, 0);
         }
         else if (!nameObject.find(L"racket")) {
-            player = new Hero(x, y, width, height, L"racket", 40, 5, 3, 0);
+            player = new Hero(x, y, width, height, L"racket", 40, 5, 3, 0, 0);
         }
         else if (!nameObject.find(L"background")) {
             location[0].hBack.loadBitmapWithNativeSize(nameObject);
@@ -121,7 +121,7 @@ void LoadSVGDataMap(const wstring NameFileSVG) {
         else if (!nameObject.find(L"spike")) {
             location[0].spike.emplace_back(x, y, width, height, L"spike");
         }
-        location[0].dialog.emplace_back(x, y, width, height, L"dialog");
+        //location[0].dialog.emplace_back(x, y, width, height, L"dialog");
     }
     file.close();
 }

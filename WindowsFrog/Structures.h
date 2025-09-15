@@ -18,11 +18,10 @@
 using namespace std;
 using namespace Gdiplus;
 HDC hdc;
-
+int name = 0;
 int currenttime = 0;
 POINT mouse;
 bool dialogCollision = false;
-int name;
 struct
 {
     HDC context;
@@ -118,7 +117,6 @@ struct sprite {
 
     void show(Graphics& g)
     {
-        //Graphics g(window.context);
         float vx = (x - player_view.x) * scale + window.width / 2.;
         float vy = (y - player_view.y) * scale + window.height / 2.;
         float vw = width * scale;
@@ -135,8 +133,11 @@ struct sprite {
     }
     void showBack(Graphics& g)
     {
-        //Graphics g(window.context);
         g.DrawImage(image, 0, 0, window.width, window.height);
+    }
+    void showDialog(Graphics& g)
+    {
+        g.DrawImage(image, x, y, width, height);
     }
 
 };
@@ -213,7 +214,7 @@ public:
     int current_lives;
     int currentLocation = 0;
     int last_trace_platform_num = -1;
-
+    int characterName;
     float maxjump = 10;
     bool inJump = false;
     const int dashDistance = 20;
@@ -222,20 +223,17 @@ public:
     bool colis = false;
     bool dash_allow = true;
 
-    character(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives)
+    character(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int name_)
     {
         Sprite.x = p_x * window.width;
         Sprite.y = p_y * window.height;
         Sprite.width = p_width * window.width;
         Sprite.height = p_height * window.height;
-        DialogSprite.x = p_x * window.width + 50;
-        DialogSprite.y = p_y * window.height - 50;
-        DialogSprite.width = p_width * window.width + 50;
-        DialogSprite.height = p_height * window.height - 10;
-
+        DialogSprite.width = window.width;
+        DialogSprite.height =window.height / 10.;
         Sprite.loadBitmapWithNativeSize(filename);
         DialogSprite.loadBitmapWithNativeSize(L"dialog");
-
+        characterName = name_;
         health_width = p_health;
         max_lives = p_max_lives;
         current_lives = p_current_lives;
@@ -262,7 +260,7 @@ struct Location_
     vector<HealingFlask> healingFlask;
     vector<Spike> spike;
     vector<character*> Persona;
-    vector<character*> dialog;
+    //vector<character*> dialog;
 
 };
 
@@ -272,11 +270,11 @@ Location_ location[5];
 class Hero : public character
 {
 public:
-    Hero(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
-        : character(p_x, p_y, p_width, p_height, filename, p_health, p_max_lives, p_current_lives)
+    Hero(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int name_, int current_location)
+        : character(p_x, p_y, p_width, p_height, filename, p_health, p_max_lives, p_current_lives, name_)
     {
 
-        string name = __FUNCTION__;
+        //string name = __FUNCTION__;
 
         Sprite.speed = 15;
         Sprite.dx = 0;
@@ -290,15 +288,15 @@ public:
 
     void move()
     {
-        if (GetAsyncKeyState(VK_LEFT) && dialogCollision == false) {
+        if (GetAsyncKeyState(VK_LEFT)) {
             Sprite.dx = -Sprite.speed;
         }
 
-        if (GetAsyncKeyState(VK_RIGHT) && dialogCollision == false) {
+        if (GetAsyncKeyState(VK_RIGHT)) {
             Sprite.dx = Sprite.speed;
         }
 
-        if (GetAsyncKeyState(VK_SPACE) && inJump == false && inJumpBot == false && dialogCollision == false)
+        if (GetAsyncKeyState(VK_SPACE) && inJump == false && inJumpBot == false)
         {
             Sprite.jump = 110;
             inJumpBot = true;
@@ -312,14 +310,14 @@ public:
     
 };
 
-class Wolf : public character //ñòðóêòóðà âðàãîâ
+class Wolf : public character
 {
 public:
 
     int direction = 1;
     
-    Wolf(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int current_location)
-        : character(p_x, p_y, p_width, p_height, filename, p_health, p_max_lives, p_current_lives)
+    Wolf(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int name_, int current_location)
+        : character(p_x, p_y, p_width, p_height, filename, p_health, p_max_lives, p_current_lives, name_)
     {
         Sprite.speed = 5;
         Sprite.dx = 0;
@@ -439,9 +437,11 @@ void Spike::damage(auto& player)
 void character::dialog(auto& player)
 {
     
-    if (CheckCollision(player->Sprite.x, player->Sprite.y, player->Sprite.width, player->Sprite.height, Sprite.x, Sprite.y, Sprite.width, Sprite.height))
+    if (CheckCollision(player->Sprite.x, player->Sprite.y, player->Sprite.width, player->Sprite.height, Sprite.x, Sprite.y, Sprite.width, Sprite.height) && GetAsyncKeyState('P'))
     {
         dialogCollision = true;
-        name++;
+        name = characterName;
+
     }
 }
+
