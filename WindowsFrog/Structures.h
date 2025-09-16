@@ -21,7 +21,8 @@ HDC hdc;
 int name = 0;
 int currenttime = 0;
 POINT mouse;
-bool dialogCollision = false;
+bool startDialog = false;
+bool endDialog = false;
 struct
 {
     HDC context;
@@ -46,6 +47,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
         return DefWindowProc(hWnd, msg, wParam, lParam);
     }
 };
+
 class Window
 {
 private:
@@ -84,7 +86,7 @@ public:
             hIns,
             NULL
         );
-
+        
         hdc = GetDC(hWnd);
         window.context = CreateCompatibleDC(hdc);
         SelectObject(window.context, CreateCompatibleBitmap(hdc, window.width, window.height));
@@ -137,7 +139,9 @@ struct sprite {
     }
     void showDialog(Graphics& g)
     {
-        g.DrawImage(image, x, y, width, height);
+        float vx = 0;
+        float vy = window.height - (window.height / 4.);
+        g.DrawImage(image, vx, vy, width, height);
     }
 
 };
@@ -222,6 +226,7 @@ public:
     bool wasShiftPressed = false;
     bool colis = false;
     bool dash_allow = true;
+    
 
     character(float p_x, float p_y, float p_width, float p_height, const wstring& filename, int p_health, int p_max_lives, int p_current_lives, int name_)
     {
@@ -436,12 +441,26 @@ void Spike::damage(auto& player)
 }
 void character::dialog(auto& player)
 {
-    
-    if (CheckCollision(player->Sprite.x, player->Sprite.y, player->Sprite.width, player->Sprite.height, Sprite.x, Sprite.y, Sprite.width, Sprite.height) && GetAsyncKeyState('P'))
+    Graphics g(window.context);
+    Font font(L"Times New Roman", 20.f, FontStyleBold);
+    Pen blackPen(Color(255, 0, 0, 0), 3);
+    SolidBrush solidBrush(Color::White);
+        float txtdX =player->Sprite.x;
+        float txtdY = player->Sprite.y - player->Sprite.height * 2.;
+        float txtdW = 50.0f;
+        float txtdH = 50.0f;
+    if (CheckCollision(player->Sprite.x, player->Sprite.y, player->Sprite.width, player->Sprite.height, Sprite.x, Sprite.y, Sprite.width, Sprite.height)  && endDialog == false)
     {
-        dialogCollision = true;
+        RectF        rectF(txtdX, txtdY, txtdW, txtdH);
+        g.DrawString(L"?", -1, &font, rectF, NULL, &solidBrush);
+        g.DrawRectangle(&blackPen, rectF);
         name = characterName;
-
+        
+      if (CheckCollision(mouse.x, mouse.y, 1, 1, txtdX, txtdY, txtdW, txtdH) /*&& GetAsyncKeyState(VK_LBUTTON)*/)
+      {
+        startDialog = true;
+      }
+        
     }
 }
 

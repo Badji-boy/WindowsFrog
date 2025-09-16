@@ -17,7 +17,8 @@ public:
 		BOOL gbool = true;
 		Graphics g(window.context);
 		Font font(L"Times New Roman", 20.f, FontStyleBold);
-		SolidBrush solidBrush(Color::Black); 
+		Pen blackPen(Color(255, 0, 0, 0), 3);
+		SolidBrush solidBrush(Color::White); 
  		LoadSVGDataMap(L"LVL0");
 		while (gbool)
 		{
@@ -32,15 +33,15 @@ public:
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-			Render(g, font, solidBrush);
-			dialogCollision == false;
+			Render(g, font, solidBrush, blackPen);
+
 		//	Sleep(16);
 
 		}
 	}
 private:
 	void UpdateApp(MSG* msg);
-	void Render(Graphics& g, Font& font, SolidBrush& solidBrush);
+	void Render(Graphics& g, Font& font, SolidBrush& solidBrush, Pen& blackPen);
 }App;
 
 
@@ -51,9 +52,9 @@ void AppGame::UpdateApp(MSG* msg)
 		msg->message = WM_QUIT;
 	}
 }
-void AppGame::Render(Graphics& g, Font& font, SolidBrush& solidBrush)
+void AppGame::Render(Graphics& g, Font& font, SolidBrush& solidBrush, Pen& blackPen)
 {
-	if(dialogCollision == false)
+	if(startDialog == false)
 	{
 		location[player->currentLocation].hBack.showBack(g);
 		player->Sprite.show(g);
@@ -104,21 +105,25 @@ void AppGame::Render(Graphics& g, Font& font, SolidBrush& solidBrush)
 
 		player_view.x = lerp(player_view.x, targetX, 0.1f);
 		player_view.y = lerp(player_view.y, targetY, 0.1f);
-
+		endDialog = false;
 	}
 	else 
 	{
 
 		float txtX = 0;
 		float txtY = window.height - (window.height / 5.);
-		location[player->currentLocation].Persona[name]->DialogSprite.x = 0;
-		location[player->currentLocation].Persona[name]->DialogSprite.y = window.height - (window.height / 4.);
+		
 		location[player->currentLocation].Persona[name]->DialogSprite.showDialog(g);
 		PointF txtBounds(txtX, txtY);
-		g.DrawString(L"Hello lkszdfngm,dznfg.m,nzd.fm,gn.z,mdnfg.m,znd.fgm,nz.d,mfng.zm,dfng.dm,fgn.z,mdfng.,zmdnfg.m,nzd.fm,gn.zdmf,gn", -1, &font, txtBounds, &solidBrush);
-		//dialogCollision = false;
-
+		//g.DrawString(L"Hello lkszdfngm,dznfg.m,nzd.fm,gn.z,mdnfg.m,znd.fgm,nz.d,mfng.zm,dfng.dm,fgn.z,mdfng.,zmdnfg.m,nzd.fm,gn.zdmf,gn", -1, &font, txtBounds, &solidBrush);
+		if (GetAsyncKeyState('K'))
+		{
+			endDialog = true;
+			startDialog = false;
+		}
 	}
+	GetCursorPos(&mouse);
+	ScreenToClient(win.GetHWND(), &mouse);
 	BitBlt(hdc, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);
 
 
