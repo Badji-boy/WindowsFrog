@@ -235,7 +235,7 @@ public:
         Sprite.width = p_width * window.width;
         Sprite.height = p_height * window.height;
         DialogSprite.width = window.width;
-        DialogSprite.height =window.height / 10.;
+        DialogSprite.height =window.height / 5.;
         Sprite.loadBitmapWithNativeSize(filename);
         DialogSprite.loadBitmapWithNativeSize(L"dialog");
         characterName = name_;
@@ -456,9 +456,10 @@ void character::dialog(auto& player)
         g.DrawRectangle(&blackPen, rectF);
         name = characterName;
         
-      if (CheckCollision(mouse.x, mouse.y, 1, 1, txtdX, txtdY, txtdW, txtdH) /*&& GetAsyncKeyState(VK_LBUTTON)*/)
+      if (GetAsyncKeyState('F'))
       {
         startDialog = true;
+
       }
         
     }
