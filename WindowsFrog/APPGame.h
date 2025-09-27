@@ -146,13 +146,13 @@ void AppGame::Render(Graphics& g, Font& font, SolidBrush& solidBrush, Pen& black
 		// Отображение текста в зависимости от состояния
 		switch (dialogState) {
 		case 0:
-			g.DrawString(L"Привет! Выберите вариант ответа:\n1 - Вариант 1\n2 - Вариант 2\n3 - Выйти", -1, &font, txtBounds, &solidBrush);
+			g.DrawString(L"Как ваше настроение, сэр Выберите вариант ответа:\n1 - Да ниче так \n2 - Все плохо, сэр\n3 - Выйти", -1, &font, txtBounds, &solidBrush);
 			break;
 		case 1:
-			g.DrawString(L"Вы выбрали вариант 1. Это ответ на первый вопрос.", -1, &font, txtBounds, &solidBrush);
+			g.DrawString(L"Отрадно слышать.", -1, &font, txtBounds, &solidBrush);
 			break;
 		case 2:
-			g.DrawString(L"Вы выбрали вариант 2. Это ответ на второй вопрос.", -1, &font, txtBounds, &solidBrush);
+			g.DrawString(L"Печально сэр, очень печально.", -1, &font, txtBounds, &solidBrush);
 			break;
 		}
 	}

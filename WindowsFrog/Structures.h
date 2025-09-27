@@ -338,7 +338,7 @@ public:
 
         processGravity(Sprite);
 
-       /* if (last_trace_platform_num >= 0)
+        if (last_trace_platform_num >= 0)
         {
             if (Sprite.x <= location[currentLocation].walls[last_trace_platform_num].Sprite.x)
             {
@@ -351,7 +351,7 @@ public:
                 direction = -1;
             }
             Sprite.dx = direction * Sprite.speed;
-        }*/
+        }
     }
     
     
@@ -444,7 +444,7 @@ void character::dialog(auto& player)
     Graphics g(window.context);
     Font font(L"Times New Roman", 20.f, FontStyleBold);
     Pen blackPen(Color(255, 0, 0, 0), 3);
-    SolidBrush solidBrush(Color::White);
+    SolidBrush solidBrush(Color::Yellow);
         float txtdX =player->Sprite.x;
         float txtdY = player->Sprite.y - player->Sprite.height * 2.;
         float txtdW = 50.0f;
@@ -452,7 +452,7 @@ void character::dialog(auto& player)
     if (CheckCollision(player->Sprite.x, player->Sprite.y, player->Sprite.width, player->Sprite.height, Sprite.x, Sprite.y, Sprite.width, Sprite.height)  && endDialog == false)
     {
         RectF        rectF(txtdX, txtdY, txtdW, txtdH);
-        g.DrawString(L"?", -1, &font, rectF, NULL, &solidBrush);
+        g.DrawString(L"F", -1, &font, rectF, NULL, &solidBrush);
         g.DrawRectangle(&blackPen, rectF);
         name = characterName;
         
