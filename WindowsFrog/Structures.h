@@ -23,6 +23,7 @@ int currenttime = 0;
 POINT mouse;
 bool startDialog = false;
 bool endDialog = false;
+
 struct
 {
     HDC context;
