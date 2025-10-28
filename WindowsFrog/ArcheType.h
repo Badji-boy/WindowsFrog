@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Component.h"
-#include "Structures.h"
-#include "ECSSoft.h"
+using namespace ECC;
 //void SpikeEvent(CTransform& Transform);
 void LoadTransform(CTransform& CTransform, float arr[]);
 void CreateObject(CTransform& CTransform);

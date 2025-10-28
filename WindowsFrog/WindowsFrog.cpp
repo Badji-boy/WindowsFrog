@@ -1,7 +1,4 @@
-﻿#include "Structures.h"
-#include "logick.h"
-#include "GameFileSystem.h"
-#include "APPGame.h"
+﻿#include "SystemECS.h"
 
 #pragma comment(lib, "GdiPlus.lib")
 #define MAX_LOADSTRING 100

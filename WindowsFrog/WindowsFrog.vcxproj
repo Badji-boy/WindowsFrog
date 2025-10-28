@@ -134,7 +134,6 @@
     <ClInclude Include="ECSSoft.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameFileSystem.h" />
-    <ClInclude Include="logick.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Structures.h" />
     <ClInclude Include="SystemECS.h" />

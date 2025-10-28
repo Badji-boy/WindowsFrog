@@ -1,7 +1,8 @@
 #pragma once
-#include <map>
 #include "Structures.h"
     //базовые компоненты
+namespace ECC
+{
     struct CTransform
     {
         float x, y, Width, Height, Dx = 0., Dy = 0.;
@@ -46,3 +47,4 @@
         bool InJumpBot = false;
         bool InJump = false;
     };
+}

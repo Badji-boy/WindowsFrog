@@ -30,9 +30,6 @@
     <ClInclude Include="Structures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="logick.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameFileSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -1,6 +1,8 @@
 #pragma once
-#include "Structures.h"
-
+#include "ECSSoft.h"
+#include "APPGame.h"
+#include "GameFileSystem.h"
+using namespace ECC;
 
 void LoadTransform(CTransform& CTransform, float arr[])
 {
@@ -127,62 +129,30 @@ void ProcessSound(CSound& CSound)
     PlaySound(TEXT(CSound.SoundNameFile), NULL, SND_FILENAME | SND_ASYNC);
 }
 
-void MovePlayer(CJump& CJump, CTransform& Transform, CSpeed& CSpeed, CCollider& CCollider, CGravity& Gravity, CStatusAnimation& StatusAnimation)
+void MovePlayer(CJump& CJump, CTransform& Transform, CSpeed& CSpeed, CCollider& CCollider, CGravity& Gravity)
 {
     CSpeed.SpeedWalk = 12;
-    if (CJump.InJump == false && CJump.InJumpBot == false)
-    {
-        StatusAnimation.StatusAnim = StatusAnimate::IDLE;
-        StatusAnimation.PatternAnim = "no pattern";
-    }
-
+   
     if (GetAsyncKeyState(VK_LEFT))
     {
-        StatusAnimation.Mirror = -1;
-        if (CJump.InJump == false && CJump.InJumpBot == false)
-        {
-            StatusAnimation.StatusAnim = StatusAnimate::WALK;
-            StatusAnimation.PatternAnim = "no pattern";
-        }
+        
         Transform.Dx = -CSpeed.SpeedWalk;
     }
     if (GetAsyncKeyState(VK_RIGHT))
     {
-        StatusAnimation.Mirror = 1;
-        if (CJump.InJump == false && CJump.InJumpBot == false)
-        {
-            StatusAnimation.StatusAnim = StatusAnimate::WALK;
-            StatusAnimation.PatternAnim = "no pattern";
-        }
+       
         Transform.Dx = CSpeed.SpeedWalk;
     }
     if (GetAsyncKeyState(VK_SPACE) && CJump.InJump == false && CJump.InJumpBot == false)
     {
-        StatusAnimation.StatusAnim = StatusAnimate::JUMP;
-        StatusAnimation.Mirror = 1;
-        StatusAnimation.PatternAnim = "no pattern";
-
         CJump.Jump = 110;
         CJump.InJumpBot = true;
         CJump.InJump = true;
     }
-
-    float cameraHalfWidth = (window.width / 2) / Transform.Scale;
-    float cameraHalfHeight = (window.height / 2) / Transform.Scale;
-
-    float targetX = Transform.x;
-    float targetY = Transform.y;
-
-    targetX = max(0 + cameraHalfWidth,
-        min(MapSizeW - cameraHalfWidth, targetX));
-    targetY = max(0 + cameraHalfHeight,
-        min(MapSizeH - cameraHalfHeight, targetY));
-
-    player_view.x = lerp(player_view.x, targetX, 0.1f);
-    player_view.y = lerp(player_view.y, targetY, 0.1f);
+    
 }
 
-void MoveCharacter(CJump& CJump, CTransform& CTransform, CSpeed& CSpeed, CCollider& CCollider, CGravity& Gravity, CStatusAnimation& StatusAnimation)
+void MoveCharacter(CJump& CJump, CTransform& CTransform, CSpeed& CSpeed, CCollider& CCollider, CGravity& Gravity)
 {
     CSpeed.SpeedWalk = 6;
 
@@ -197,16 +167,10 @@ void MoveCharacter(CJump& CJump, CTransform& CTransform, CSpeed& CSpeed, CCollid
                     auto& platform = *VLocation[i].VWall[CCollider.LastTracePlatformNum].GetPosition();
                     if (CTransform.x <= platform.x)
                     {
-                        StatusAnimation.StatusAnim = StatusAnimate::WALK;
-                        StatusAnimation.Mirror = 1;
-                        StatusAnimation.PatternAnim = "no pattern";
                         CCollider.Direction = 1;
                     }
                     if (CTransform.x + CTransform.Width >= platform.x + platform.Width)
                     {
-                        StatusAnimation.StatusAnim = StatusAnimate::WALK;
-                        StatusAnimation.Mirror = -1;
-                        StatusAnimation.PatternAnim = "no pattern";
                         CCollider.Direction = -1;
                     }
                 }
@@ -216,232 +180,10 @@ void MoveCharacter(CJump& CJump, CTransform& CTransform, CSpeed& CSpeed, CCollid
     }
 }
 
-void AddCharacterModifier(
-    CHealth& CHealth, CDefense& CDefense, CDamage& CDamage, CSpeed& CSpeed, CSpecialization& CSpecialization,
-    CGender& CGender, CStatusBehavior& CStatusBehavior, CTypeCharacter& CTypeCharacter, CNameCharacter& CNameCharacter, CRank& CRank,
-    string TypeDamage, string Status, string TypeCharacter, string Gender, string NameChar, string Specialization, int Rank)
-{
-
-
-
-}
-
-void SwitchLotation(CPortalPath& PortalPath, CTransform& Transform)
-{
-    if (CheckCollision(Player->GetPosition()->x, Player->GetPosition()->y, Player->GetPosition()->Width, Player->GetPosition()->Height, Transform.x, Transform.y, Transform.Width, Transform.Height))
-    {
-        if (VLocation.size() >= PortalPath.Path)
-        {
-            Player->SetLocation(PortalPath.Path);
-            Player->GetPosition()->x = 2473;
-            Player->GetPosition()->y = 3639;
-            MapSizeW = VLocation[PortalPath.Path].GetPosition()->Width;
-            MapSizeH = VLocation[PortalPath.Path].GetPosition()->Height;
-        }
-    }
-}
-
-bool HealEvent(CTransform& Transform, CHealth& CHealth)
-{
-    CHealth.Health = 30;
-    if (CheckCollision(Player->GetPosition()->x, Player->GetPosition()->y, Player->GetPosition()->Width, Player->GetPosition()->Height, Transform.x, Transform.y, Transform.Width, Transform.Height))
-    {
-        if (Player->GetHealth()->Health < Player->GetHealth()->MaxHealth)
-        {
-            if (Player->GetHealth()->Health + CHealth.Health > Player->GetHealth()->MaxHealth)
-            {
-                Player->GetHealth()->Health += Player->GetHealth()->MaxHealth - (Player->GetHealth()->Health + CHealth.Health);
-                return true;
-            }
-            else if (Player->GetHealth()->Health == Player->GetHealth()->MaxHealth)
-            {
-                return false;
-            }
-            else
-            {
-                Player->GetHealth()->Health += CHealth.Health;
-                return true;
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void SpikeEvent(CTransform& Transform, CDamage& Damage)
-{
-    static int lastDamageTime = 0;
-    bool spikeCollision = false;
-    if (CheckCollision(Player->GetPosition()->x, Player->GetPosition()->y, Player->GetPosition()->Width, Player->GetPosition()->Height, Transform.x, Transform.y, Transform.Width, Transform.Height))
-    {
-        spikeCollision = true;
-    }
-    if (spikeCollision && currenttime > lastDamageTime + 1000) {
-        Damage.Damage = 30;
-        if (Player->GetHealth()->Health > Damage.Damage)
-        {
-            Player->GetHealth()->Health -= Damage.Damage;
-            lastDamageTime = currenttime;
-            Player->GetJump()->Jump = 60;
-            Player->GetPosition()->x += 20;
-            Player->GetJump()->InJump = true;
-        }
-        else
-        {
-            Player->Destroy();
-            exit(0); // ааааааа аа ааааааааа аааааа ааа аааа ааа аааааа аааааа аааааааа
-        }
-    }
-}
-
-void HealthBar()
-{
-    SetTextColor(window.context, RGB(50, 205, 50));
-    //SetBkMode(window.context, TRANSPARENT); //аааааааааааа
-    auto hFont = CreateFont(70, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 2, 0, "CALIBRI"); //ааааа
-    auto hTmp = (HFONT)SelectObject(window.context, hFont);
-
-    char txt[32];
-    _itoa_s(Player->GetHealth()->Health, txt, 10); // аа аааа ааааааааа аааааа
-    TextOutA(window.context, window.width - 400, window.height - 1000, (LPCSTR)txt, strlen(txt));// аааа ааааа аааааа
-}
-
 void AppGame::Init()
 {
-    LoadSVGDataMap(MAPS"LVLDemoDay0");
-    LoadSVGDataMap(MAPS"LVLDemoDay1");
-
-    LoadAnimationFiles(PLAYER"Animation");
-    LoadAnimationFiles(ENEMY"Animation");
-
-    LoadPatternAnmation();
-
-    MapSizeW = VLocation[0].GetPosition()->Width;
-    MapSizeH = VLocation[0].GetPosition()->Height;
-}
-
-void AppGame::Render()
-{
-    float sin_ = sin(Timer.TimePeak()) / 1.0f + 0.5f;
-    d3dx.RenderClearBuffer(0.2f, 0.2f, 1.0f);
-
-    for (int i = 0; i < VLocation.size(); i++)
-    {
-        if (Player->GetLocation() == i)
-        {
-            d3dx.DrawObject(
-                VLocation[Player->GetLocation()].GetPosition()->x,
-                VLocation[Player->GetLocation()].GetPosition()->y,
-                1,
-                VLocation[Player->GetLocation()].GetPosition()->Width,
-                VLocation[Player->GetLocation()].GetPosition()->Height,
-                0,
-                VLocation[Player->GetLocation()].GetRender()->TypeRender,
-                VLocation[Player->GetLocation()].GetTexture()->Texture,
-                VLocation[Player->GetLocation()].GetNameObj()->Name,
-                VLocation[Player->GetLocation()].GetStatusAnimation()->StatusAnim
-            );
-
-            for (ATWall var : VLocation[i].VWall)
-            {
-                d3dx.DrawObject(
-                    var.GetPosition()->x, var.GetPosition()->y, 1,
-                    var.GetPosition()->Width, var.GetPosition()->Height,
-                    0,
-                    var.GetRender()->TypeRender,
-                    var.GetTexture()->Texture,
-                    var.GetNameObj()->Name,
-                    var.GetStatusAnimation()->StatusAnim
-                );
-            }
-            for (ATEnemy var : VLocation[i].VEnemy)
-            {
-                d3dx.SetAnimetionTimeLine(var.GetTimeLine()->TimeLineIt, var.GetTimeLine()->TimeLineName, var.GetStatusAnimation()->Mirror, var.GetStatusAnimation()->PatternAnim);
-                d3dx.DrawObject(
-                    var.GetPosition()->x, var.GetPosition()->y, 1,
-                    var.GetPosition()->Width, var.GetPosition()->Height,
-                    0,
-                    var.GetRender()->TypeRender,
-                    var.GetTexture()->Texture,
-                    var.GetNameObj()->Name,
-                    var.GetStatusAnimation()->StatusAnim
-                );
-                var.GetTimeLine()->TimeLineIt = d3dx.GetTimeLineIt();
-                var.GetTimeLine()->TimeLineName = d3dx.GetTimeLineName();
-
-                var.Start();
-            }
-            for (ATHealFlack var : VLocation[i].VHealFlack)
-            {
-                d3dx.DrawObject(
-                    var.GetPosition()->x, var.GetPosition()->y, 1,
-                    var.GetPosition()->Width, var.GetPosition()->Height,
-                    0,
-                    var.GetRender()->TypeRender,
-                    var.GetTexture()->Texture,
-                    var.GetNameObj()->Name,
-                    var.GetStatusAnimation()->StatusAnim
-                );
-                if (var.GoEvent())
-                {
-                    var.Destroy();
-                }
-            }
-            for (ATPortal var : VLocation[i].VPortal)
-            {
-                d3dx.DrawObject(
-                    var.GetPosition()->x, var.GetPosition()->y, 1,
-                    var.GetPosition()->Width, var.GetPosition()->Height,
-                    0,
-                    var.GetRender()->TypeRender,
-                    var.GetTexture()->Texture,
-                    var.GetNameObj()->Name,
-                    var.GetStatusAnimation()->StatusAnim
-                );
-                var.GoEvent();
-            }
-            for (ATSpike var : VLocation[i].VSpike)
-            {
-                d3dx.DrawObject(
-                    var.GetPosition()->x, var.GetPosition()->y, 1,
-                    var.GetPosition()->Width, var.GetPosition()->Height,
-                    0,
-                    var.GetRender()->TypeRender,
-                    var.GetTexture()->Texture,
-                    var.GetNameObj()->Name,
-                    var.GetStatusAnimation()->StatusAnim
-                );
-                var.GoEvent();
-            }
-
-            d3dx.SetAnimetionTimeLine(Player->GetTimeLine()->TimeLineIt, Player->GetTimeLine()->TimeLineName, Player->GetStatusAnimation()->Mirror, Player->GetStatusAnimation()->PatternAnim);
-            d3dx.DrawObject(
-                Player->GetPosition()->x, Player->GetPosition()->y, 1,
-                Player->GetPosition()->Width, Player->GetPosition()->Height,
-                0,
-                Player->GetRender()->TypeRender,
-                Player->GetTexture()->Texture,
-                Player->GetNameObj()->Name,
-                Player->GetStatusAnimation()->StatusAnim
-            );
-            Player->GetTimeLine()->TimeLineIt = d3dx.GetTimeLineIt();
-            Player->GetTimeLine()->TimeLineName = d3dx.GetTimeLineName();
-
-            Player->Start();
-            HealthBar();
-            break;
-        }
-    }
-
-    d3dx.SetCameraTarget(Player->GetPosition()->x, Player->GetPosition()->y);
-
-    d3dx.Present(true);
+    LoadSVGDataMap(L"LVLDemoDay0");
+    LoadSVGDataMap(L"LVLDemoDay1");
 }
 
 void AppGame::UpdateApp(MSG* msg)
@@ -451,4 +193,111 @@ void AppGame::UpdateApp(MSG* msg)
         msg->message = WM_QUIT;
     }
 }
+void AppGame::Render(Graphics& g, Font& font, SolidBrush& solidBrush, Pen& blackPen)
+{
+    location[player->currentLocation].hBack.showBack(g);
+    player->Sprite.show(g);
+
+    for (int i = 0; i < location[player->currentLocation].Persona.size(); i++) {
+        location[player->currentLocation].Persona[i]->dialog(player);
+        location[player->currentLocation].Persona[i]->Sprite.show(g);
+        location[player->currentLocation].Persona[i]->move();
+    }
+    //Health_bar.Show();
+
+    for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
+        location[player->currentLocation].walls[i].Sprite.show(g);
+    }
+    for (int i = 0; i < location[player->currentLocation].healingFlask.size(); i++) {
+        location[player->currentLocation].healingFlask[i].Sprite.show(g);
+        location[player->currentLocation].healingFlask[i].healing(player, i);
+    }
+    for (int i = 0; i < location[player->currentLocation].spike.size(); i++) {
+        location[player->currentLocation].spike[i].Sprite.show(g);
+        location[player->currentLocation].spike[i].damage(player);
+    }
+    for (int i = 0; i < location[player->currentLocation].portal.size(); i++) {
+        location[player->currentLocation].portal[i].Sprite.show(g);
+        location[player->currentLocation].portal[i].Portal(player);
+    }
+    float ls = .2 * length(player_view.x, player->Sprite.x, player_view.y, player->Sprite.y) / 500.;
+    ls = max(ls - .2, 0.1);
+    ls = min(ls, 1);
+
+    float cameraHalfWidth = (window.width / 2.) / scale;
+    float cameraHalfHeight = (window.height / 2.) / scale;
+
+    float targetX = player->Sprite.x;
+    float targetY = player->Sprite.y;
+
+    targetX = max(0 + cameraHalfWidth,
+        min(window.width - cameraHalfWidth, targetX));
+    targetY = max(0 + cameraHalfHeight,
+        min(window.height - cameraHalfHeight, targetY));
+
+    player_view.x = lerp(player_view.x, targetX, 0.1f);
+    player_view.y = lerp(player_view.y, targetY, 0.1f);
+
+    if (startDialog == false)
+    {
+        player->move();
+        endDialog = false;
+        // Сброс состояния диалога при выходе
+        dialogState = 0;
+        keyProcessed = false;
+    }
+    else if (startDialog == true)
+    {
+        float txtX = 0;
+        float txtY = window.height - (window.height / 4.);
+
+        location[player->currentLocation].Persona[name]->DialogSprite.showDialog(g);
+        PointF txtBounds(txtX, txtY);
+
+        // Обработка нажатий клавиш (только когда клавиша отпущена после нажатия)
+        bool key1Pressed = (GetAsyncKeyState('1') & 0x8000) != 0;
+        bool key2Pressed = (GetAsyncKeyState('2') & 0x8000) != 0;
+        bool key3Pressed = (GetAsyncKeyState('3') & 0x8000) != 0;
+
+        // Если клавиши отпущены, сбрасываем флаг обработки
+        if (!key1Pressed && !key2Pressed && !key3Pressed) {
+            keyProcessed = false;
+        }
+
+        // Обрабатываем нажатия только если они еще не обработаны
+        if (!keyProcessed) {
+            if (key1Pressed) {
+                dialogState = 1;
+                keyProcessed = true;
+            }
+            else if (key2Pressed) {
+                dialogState = 2;
+                keyProcessed = true;
+            }
+            else if (key3Pressed) {
+                endDialog = true;
+                startDialog = false;
+                keyProcessed = true;
+            }
+        }
+
+        // Отображение текста в зависимости от состояния
+        switch (dialogState) {
+        case 0:
+            g.DrawString(L"Как ваше настроение, сэр Выберите вариант ответа:\n1 - Да ниче так \n2 - Все плохо, сэр\n3 - Выйти", -1, &font, txtBounds, &solidBrush);
+            break;
+        case 1:
+            g.DrawString(L"Отрадно слышать.", -1, &font, txtBounds, &solidBrush);
+            break;
+        case 2:
+            g.DrawString(L"Печально сэр, очень печально.", -1, &font, txtBounds, &solidBrush);
+            break;
+        }
+    }
+
+    GetCursorPos(&mouse);
+    ScreenToClient(win.GetHWND(), &mouse);
+    BitBlt(hdc, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);
+}
+
 

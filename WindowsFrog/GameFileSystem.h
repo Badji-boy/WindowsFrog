@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Structures.h"
+#include "ArcheType.h"
 
 wstring StrReplace(wstring* str, wstring namestr) {
     return str->replace(str->find(namestr), namestr.length(), L"");

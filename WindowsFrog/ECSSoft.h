@@ -15,7 +15,7 @@ private:
         int IDEntity;
         int IDComponent;
         size_t Mask;
-        char* pData = new char[Mask + IDEntity];
+        char* pData = new char[Mask];
 
         inline char* get()
         {
@@ -38,8 +38,7 @@ private:
                 if (MaskTemp == VComponentPool[i].pData || MaskTemp == nullptr)
                 {
                     VEntity[id].CountComponent--;
-                    vector<ComponentPool>::iterator it;
-                    it = VComponentPool.begin() + i;
+                    auto it = VComponentPool.begin() + i;
                     VComponentPool[i].del();
                     VComponentPool.erase(it);
                     break;
