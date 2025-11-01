@@ -97,29 +97,17 @@ void LoadSVGDataMap(const wstring NameFileSVG) {
         float width = stof(bufferData[0][i]) / window.width;
         float height = stof(bufferData[1][i]) / window.height;
         wstring nameObject = dS[0][i];
-
+        float arr[4]{ x, y, width, height };
 
         //создание объектов пока что только для уровня 0
         if (!nameObject.find(L"walls")) {
-            location[0].walls.emplace_back(x, y, width, height, L"walls");
+            VLocation[0].VWall.emplace_back(L"walls", arr);
         }
         else if (!nameObject.find(L"enemy")) {
-            wolf = new Wolf(x, y, width, height, L"enemy1", 40, 5, 3, name++, 0);
+            Enemy = new ATEnemy("enemy1", arr);
         }
         else if (!nameObject.find(L"racket")) {
-            player = new Hero(x, y, width, height, L"racket", 40, 5, 3, 0, 0);
-        }
-        else if (!nameObject.find(L"background")) {
-            location[0].hBack.loadBitmapWithNativeSize(nameObject);
-        }
-        else if (!nameObject.find(L"portal")) {
-            location[0].portal.emplace_back(x, y, width, height, L"racket", 1); // пока реализациия работает на переход на 1 уровень
-        }
-        else if (!nameObject.find(L"heal")) {
-            location[0].healingFlask.emplace_back(x, y, width, height, L"ball");
-        }
-        else if (!nameObject.find(L"spike")) {
-            location[0].spike.emplace_back(x, y, width, height, L"spike");
+            Player = new ATPlayer(L"racket", arr);
         }
         //location[0].dialog.emplace_back(x, y, width, height, L"dialog");
     }

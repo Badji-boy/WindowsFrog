@@ -20,7 +20,6 @@ public:
 		Font font(L"Times New Roman", 20.f, FontStyleBold);
 		Pen blackPen(Color(255, 0, 0, 0), 3);
 		SolidBrush solidBrush(Color::Black); 
- 		LoadSVGDataMap(L"LVL0");
 		while (gbool)
 		{
 			while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))

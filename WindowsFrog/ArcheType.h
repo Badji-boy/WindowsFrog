@@ -1,12 +1,10 @@
 ﻿#pragma once
 #include "Component.h"
 using namespace ECC;
-//void SpikeEvent(CTransform& Transform);
 void LoadTransform(CTransform& CTransform, float arr[]);
 void CreateObject(CTransform& CTransform);
 void TracerCollide(CCollider& CCollider, CTransform& Transform, CJump& CJump);
 void ProcessGravity(CJump& CJump, CTransform& Transform, CGravity& Gravity);
-//void ProcessSound(CSound& CSound);
 void MovePlayer(CJump& CJump, CTransform& Transform, CSpeed& CSpeed, CCollider& CCollider, CGravity& Gravity);
 void MoveCharacter(CJump& CJump, CTransform& CTransform, CSpeed& CSpeed, CCollider& CCollider, CGravity& Gravity);
 
@@ -25,7 +23,7 @@ protected:
    
     int WhatLocation;
 
-    BaseArcheType(string NameFile, float arr[])
+    BaseArcheType(wchar_t NameFile, float arr[])
     {
         LoadTransform(*Transform, arr);
         Textures->Texture = NameFile;
@@ -75,7 +73,7 @@ protected:
     CGravity* Gravity = ECS.SetComponent<CGravity>(Entity);
     CCollider* Collider = ECS.SetComponent<CCollider>(Entity);
 
-    BasePerson(string NameFile, float arr[]) : BaseArcheType(NameFile, arr) {}
+    BasePerson(wchar_t NameFile, float arr[]) : BaseArcheType(NameFile, arr) {}
 public:
     CJump* GetJump()
     {
@@ -91,7 +89,7 @@ public:
 class ATWall : public BaseArcheType
 {
 public:
-    ATWall(string NameFile, float arr[]) : BaseArcheType(NameFile, arr)
+    ATWall(wchar_t NameFile, float arr[]) : BaseArcheType(NameFile, arr)
     {
         NameObject->Name = "Wall";
     }
@@ -112,6 +110,7 @@ public:
     }
 }*Enemy;
 
+
 class ATPlayer : public BasePerson
 {
 public:
@@ -128,7 +127,7 @@ public:
 class ATLocation : public BaseArcheType
 {
 public:
-    ATLocation(string NameFile, float arr[]) : BaseArcheType(NameFile, arr)
+    ATLocation( wchar_t NameFile, float arr[]) : BaseArcheType(NameFile, arr)
     {
         NameObject->Name = "Level";
     }

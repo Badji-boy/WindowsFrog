@@ -182,8 +182,7 @@ void MoveCharacter(CJump& CJump, CTransform& CTransform, CSpeed& CSpeed, CCollid
 
 void AppGame::Init()
 {
-    LoadSVGDataMap(L"LVLDemoDay0");
-    LoadSVGDataMap(L"LVLDemoDay1");
+    LoadSVGDataMap(L"LVL0");
 }
 
 void AppGame::UpdateApp(MSG* msg)
@@ -195,7 +194,7 @@ void AppGame::UpdateApp(MSG* msg)
 }
 void AppGame::Render(Graphics& g, Font& font, SolidBrush& solidBrush, Pen& blackPen)
 {
-    location[player->currentLocation].hBack.showBack(g);
+    VLocation[player->currentLocation].hBack.showBack(g);
     player->Sprite.show(g);
 
     for (int i = 0; i < location[player->currentLocation].Persona.size(); i++) {
