@@ -58,105 +58,112 @@ void AppGame::UpdateApp(MSG* msg)
 void AppGame::Render(Graphics& g, Font& font, SolidBrush& solidBrush, Pen& blackPen)
 {
 	location[player->currentLocation].hBack.showBack(g);
-	player->Sprite.show(g);
+	//player->Sprite.show(g);
 
-	for (int i = 0; i < location[player->currentLocation].Persona.size(); i++) {
-		location[player->currentLocation].Persona[i]->dialog(player);
-		location[player->currentLocation].Persona[i]->Sprite.show(g);
-		location[player->currentLocation].Persona[i]->move();
-	}
-	//Health_bar.Show();
+	//for (int i = 0; i < location[player->currentLocation].Persona.size(); i++) {
+	//	location[player->currentLocation].Persona[i]->dialog(player);
+	//	location[player->currentLocation].Persona[i]->Sprite.show(g);
+	//	location[player->currentLocation].Persona[i]->move();
+	//}
+	////Health_bar.Show();
 
-	for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
-		location[player->currentLocation].walls[i].Sprite.show(g);
-	}
-	for (int i = 0; i < location[player->currentLocation].healingFlask.size(); i++) {
-		location[player->currentLocation].healingFlask[i].Sprite.show(g);
-		location[player->currentLocation].healingFlask[i].healing(player, i);
-	}
-	for (int i = 0; i < location[player->currentLocation].spike.size(); i++) {
-		location[player->currentLocation].spike[i].Sprite.show(g);
-		location[player->currentLocation].spike[i].damage(player);
-	}
-	for (int i = 0; i < location[player->currentLocation].portal.size(); i++) {
-		location[player->currentLocation].portal[i].Sprite.show(g);
-		location[player->currentLocation].portal[i].Portal(player);
-	}
-	float ls = .2 * length(player_view.x, player->Sprite.x, player_view.y, player->Sprite.y) / 500.;
-	ls = max(ls - .2, 0.1);
-	ls = min(ls, 1);
+	//for (int i = 0; i < location[player->currentLocation].walls.size(); i++) {
+	//	location[player->currentLocation].walls[i].Sprite.show(g);
+	//}
+	//for (int i = 0; i < location[player->currentLocation].healingFlask.size(); i++) {
+	//	location[player->currentLocation].healingFlask[i].Sprite.show(g);
+	//	location[player->currentLocation].healingFlask[i].healing(player, i);
+	//}
+	//for (int i = 0; i < location[player->currentLocation].spike.size(); i++) {
+	//	location[player->currentLocation].spike[i].Sprite.show(g);
+	//	location[player->currentLocation].spike[i].damage(player);
+	//}
+	//for (int i = 0; i < location[player->currentLocation].portal.size(); i++) {
+	//	location[player->currentLocation].portal[i].Sprite.show(g);
+	//	location[player->currentLocation].portal[i].Portal(player);
+	//}
+	//float ls = .2 * length(player_view.x, player->Sprite.x, player_view.y, player->Sprite.y) / 500.;
+	//ls = max(ls - .2, 0.1);
+	//ls = min(ls, 1);
 
-	float cameraHalfWidth = (window.width / 2.) / scale;
-	float cameraHalfHeight = (window.height / 2.) / scale;
+	//float cameraHalfWidth = (window.width / 2.) / scale;
+	//float cameraHalfHeight = (window.height / 2.) / scale;
 
-	float targetX = player->Sprite.x;
-	float targetY = player->Sprite.y;
+	//float targetX = player->Sprite.x;
+	//float targetY = player->Sprite.y;
 
-	targetX = max(0 + cameraHalfWidth,
-		min(window.width - cameraHalfWidth, targetX));
-	targetY = max(0 + cameraHalfHeight,
-		min(window.height - cameraHalfHeight, targetY));
+	//targetX = max(0 + cameraHalfWidth,
+	//	min(window.width - cameraHalfWidth, targetX));
+	//targetY = max(0 + cameraHalfHeight,
+	//	min(window.height - cameraHalfHeight, targetY));
 
-	player_view.x = lerp(player_view.x, targetX, 0.1f);
-	player_view.y = lerp(player_view.y, targetY, 0.1f);
-	
-	if (startDialog == false)
-	{
-		player->move();
-		endDialog = false;
-		// Сброс состояния диалога при выходе
-		dialogState = 0;
-		keyProcessed = false;
-	}
-	else if (startDialog == true)
-	{
-		float txtX = 0;
-		float txtY = window.height - (window.height / 4.);
+	//player_view.x = lerp(player_view.x, targetX, 0.1f);
+	//player_view.y = lerp(player_view.y, targetY, 0.1f);
+	//
+	//if (startDialog == false)
+	//{
+	//	player->move();
+	//	endDialog = false;
+	//	// Сброс состояния диалога при выходе
+	//	dialogState = 0;
+	//	keyProcessed = false;
+	//}
+	//else if (startDialog == true)
+	//{
+	//	float txtX = 0;
+	//	float txtY = window.height - (window.height / 4.);
 
-		location[player->currentLocation].Persona[name]->DialogSprite.showDialog(g);
-		PointF txtBounds(txtX, txtY);
+	//	location[player->currentLocation].Persona[name]->DialogSprite.showDialog(g);
+	//	PointF txtBounds(txtX, txtY);
 
-		// Обработка нажатий клавиш (только когда клавиша отпущена после нажатия)
-		bool key1Pressed = (GetAsyncKeyState('1') & 0x8000) != 0;
-		bool key2Pressed = (GetAsyncKeyState('2') & 0x8000) != 0;
-		bool key3Pressed = (GetAsyncKeyState('3') & 0x8000) != 0;
+	//	// Обработка нажатий клавиш (только когда клавиша отпущена после нажатия)
+	//	bool key1Pressed = (GetAsyncKeyState('1') & 0x8000) != 0;
+	//	bool key2Pressed = (GetAsyncKeyState('2') & 0x8000) != 0;
+	//	bool key3Pressed = (GetAsyncKeyState('3') & 0x8000) != 0;
 
-		// Если клавиши отпущены, сбрасываем флаг обработки
-		if (!key1Pressed && !key2Pressed && !key3Pressed) {
-			keyProcessed = false;
-		}
+	//	// Если клавиши отпущены, сбрасываем флаг обработки
+	//	if (!key1Pressed && !key2Pressed && !key3Pressed) {
+	//		keyProcessed = false;
+	//	}
 
-		// Обрабатываем нажатия только если они еще не обработаны
-		if (!keyProcessed) {
-			if (key1Pressed) {
-				dialogState = 1;
-				keyProcessed = true;
-			}
-			else if (key2Pressed) {
-				dialogState = 2;
-				keyProcessed = true;
-			}
-			else if (key3Pressed) {
-				endDialog = true;
-				startDialog = false;
-				keyProcessed = true;
-			}
-		}
+	//	// Обрабатываем нажатия только если они еще не обработаны
+	//	if (!keyProcessed) {
+	//		if (key1Pressed) {
+	//			dialogState = 1;
+	//			keyProcessed = true;
+	//		}
+	//		else if (key2Pressed) {
+	//			dialogState = 2;
+	//			keyProcessed = true;
+	//		}
+	//		else if (key3Pressed) {
+	//			endDialog = true;
+	//			startDialog = false;
+	//			keyProcessed = true;
+	//		}
+	//	}
 
-		// Отображение текста в зависимости от состояния
-		switch (dialogState) {
-		case 0:
-			g.DrawString(L"Как ваше настроение, сэр Выберите вариант ответа:\n1 - Да ниче так \n2 - Все плохо, сэр\n3 - Выйти", -1, &font, txtBounds, &solidBrush);
-			break;
-		case 1:
-			g.DrawString(L"Отрадно слышать.", -1, &font, txtBounds, &solidBrush);
-			break;
-		case 2:
-			g.DrawString(L"Печально сэр, очень печально.", -1, &font, txtBounds, &solidBrush);
-			break;
-		}
-	}
-
+	//	// Отображение текста в зависимости от состояния
+	//	switch (dialogState) {
+	//	case 0:
+	//		g.DrawString(L"Как ваше настроение, сэр Выберите вариант ответа:\n1 - Да ниче так \n2 - Все плохо, сэр\n3 - Выйти", -1, &font, txtBounds, &solidBrush);
+	//		break;
+	//	case 1:
+	//		g.DrawString(L"Отрадно слышать.", -1, &font, txtBounds, &solidBrush);
+	//		break;
+	//	case 2:
+	//		g.DrawString(L"Печально сэр, очень печально.", -1, &font, txtBounds, &solidBrush);
+	//		break;
+	//	}
+	//}
+	//Bresenham::DrawLine(0, 0, 1000, 1000);
+	//Bresenham::DrowQuad(Bresenham::points);
+	//Bresenham::DrawRotatingQuad();
+//D3D::DrawRotatingCube();
+Cube3D::DrawRotatingCube();
+//zbuffer::DrawRotatingCubeWithZBuffer();
+//zbuffer::DrawFilledTriangleWithZBuffer(200, 200, 200, -200, 200, 200, -200, 200, 200);
+//Cube3D::DrawFilledCube(Cube3D::StartPoints);
 	GetCursorPos(&mouse);
 	ScreenToClient(win.GetHWND(), &mouse);
 	BitBlt(hdc, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);

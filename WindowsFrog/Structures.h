@@ -4,6 +4,7 @@
 #include "ctime"
 #include "vector"
 #include <thread>
+#include <limits>
 #include <iostream>
 #include <string>
 #include <source_location>
@@ -464,4 +465,398 @@ void character::dialog(auto& player)
         
     }
 }
+
+namespace Cube3D
+{
+    struct Point3D  //структура вершин
+    {
+        float x, y, z;
+        Point3D(float x, float y, float z) :x(x), y(y), z(z) {}
+    };
+
+    struct Point2D
+    {
+        int x, y;
+        Point2D(int x = 0, int y = 0) : x(x), y(y) {}
+    };
+
+    struct Matrix4x4
+    {
+        float m[4][4] = { 0 };
+    };
+
+    const int SCREEN_WIDTH = window.width;
+    const int SCREEN_HEIGHT = window.height;
+    const float CAMERA_DIST = 500.0f;
+
+    vector<vector<float>> zBuffer;
+    bool zBufferInitialized = false;
+    #undef max
+    // Инициализация Z-буфера
+    void InitializeZBuffer(int width = window.width, int height = window.height)
+    {
+        zBuffer.resize(height, vector<float>(width, std::numeric_limits<float>::max()));
+        zBufferInitialized = true;
+    }
+
+    // Очистка Z-буфера (вызывать каждый кадр)
+    void ClearZBuffer()
+    {
+        if (!zBufferInitialized) return;
+
+        for (int y = 0; y < window.height; y++) {
+            for (int x = 0; x < window.width; x++) {
+                zBuffer[y][x] = std::numeric_limits<float>::max();
+            }
+        }
+    }
+
+    // Функция для проверки и обновления z-буфера
+    bool UpdateZBuffer(int x, int y, float z)
+    {
+        if (x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT)
+            return false;
+
+        if (z < zBuffer[y][x]) {
+            zBuffer[y][x] = z;
+            return true;
+        }
+        return false;
+    }
+
+    Matrix4x4 TurnX(float angle) //матрица поворота для х
+    {
+        Matrix4x4 m;
+        m.m[0][0] = 1.0f;
+        m.m[1][1] = cos(angle);
+        m.m[1][2] = sin(angle);
+        m.m[2][1] = -sin(angle);
+        m.m[2][2] = cos(angle);
+        m.m[3][3] = 1.0f;
+        return m;
+    };
+
+    Matrix4x4 TurnY(float angle) //матрица поворота для у
+    {
+        Matrix4x4 m;
+        m.m[0][0] = cos(angle);
+        m.m[0][2] = -sin(angle);
+        m.m[1][1] = 1.0f;
+        m.m[2][0] = sin(angle);
+        m.m[2][2] = cos(angle);
+        m.m[3][3] = 1.0f;
+        return m;
+    };
+
+    Matrix4x4 TurnZ(float angle) //матрица поворота для z
+    {
+        Matrix4x4 m;
+        m.m[0][0] = cos(angle);
+        m.m[0][1] = sin(angle);
+        m.m[1][0] = -sin(angle);
+        m.m[1][1] = cos(angle);
+        m.m[2][2] = 1.0f;
+        m.m[3][3] = 1.0f;
+        return m;
+    };
+
+    vector <Point3D> StartPoints = {
+        Point3D(-200,-200,200), //0 нижняя левая
+        Point3D(-200,200,200), //1 верхняя левая
+        Point3D(200,200,200), //2 верхняя правая
+        Point3D(200,-200,200), //3 нижняя правая
+        //далее задняя грань
+        Point3D(-200,-200,-200), //4 нижняя левая
+        Point3D(-200,200,-200), //5 верхняя левая
+        Point3D(200,200,-200), //6 верхняя правая
+        Point3D(200,-200,-200) //7 нижняя правая
+    };
+
+    vector<pair<int, int>> cubeEdges = {
+        // Передняя грань
+        {0, 1}, {1, 2}, {2, 3}, {3, 0},
+        // Задняя грань
+        {4, 5}, {5, 6}, {6, 7}, {7, 4},
+        // Соединяющие ребра
+        {0, 4}, {1, 5}, {2, 6}, {3, 7}
+    };
+
+    vector<vector<int>> cubeFaces = {
+            {0, 1, 2, 3}, // передняя грань
+            {4, 5, 6, 7}, // задняя грань
+            {0, 1, 5, 4}, // левая грань
+            {2, 3, 7, 6}, // правая грань
+            {0, 3, 7, 4}, // нижняя грань
+            {1, 2, 6, 5}  // верхняя грань
+    };
+
+    Matrix4x4 MultiplyMatrices(const Matrix4x4& a, const Matrix4x4& b)
+    {
+        Matrix4x4 result;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                result.m[i][j] = 0;
+                for (int k = 0; k < 4; k++) {
+                    result.m[i][j] += a.m[i][k] * b.m[k][j];
+                }
+            }
+        }
+        return result;
+    }
+
+    Point3D MultiplyPointMatrix(const Point3D& point, const Matrix4x4& matrix)
+    {
+        Point3D result(0, 0, 0);
+
+        result.x = point.x * matrix.m[0][0] + point.y * matrix.m[1][0] + point.z * matrix.m[2][0];
+        result.y = point.x * matrix.m[0][1] + point.y * matrix.m[1][1] + point.z * matrix.m[2][1];
+        result.z = point.x * matrix.m[0][2] + point.y * matrix.m[1][2] + point.z * matrix.m[2][2];
+
+        return result;
+    }
+
+    Point3D ProjectPoint(const Point3D& point)
+    {
+        Point3D projected(0, 0, 0);
+
+        if (point.z + CAMERA_DIST != 0) {
+            projected.x = SCREEN_WIDTH / 2. + point.x * CAMERA_DIST / (point.z + CAMERA_DIST);
+            projected.y = SCREEN_HEIGHT / 2. - point.y * CAMERA_DIST / (point.z + CAMERA_DIST);
+        }
+        else {
+            projected.x = SCREEN_WIDTH / 2.;
+            projected.y = SCREEN_HEIGHT / 2.;
+        }
+        projected.z = point.z;
+
+        return projected;
+    }
+
+    // Функция интерполяции z-координаты в треугольнике
+    float InterpolateZ(const Point3D& p1, const Point3D& p2, const Point3D& p3, int px, int py)
+    {
+        // Вычисляем барицентрические координаты
+        float denom = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
+        if (fabs(denom) < 1e-6) return p1.z; // избегаем деления на ноль
+
+        float lambda1 = ((p2.y - p3.y) * (px - p3.x) + (p3.x - p2.x) * (py - p3.y)) / denom;
+        float lambda2 = ((p3.y - p1.y) * (px - p3.x) + (p1.x - p3.x) * (py - p3.y)) / denom;
+        float lambda3 = 1.0f - lambda1 - lambda2;
+
+        // Интерполируем z-координату
+        return lambda1 * p1.z + lambda2 * p2.z + lambda3 * p3.z;
+    }
+
+    void DrawLine(int x1, int y1, int x2, int y2)
+    {
+        int dx = abs(x2 - x1);
+        int dy = abs(y2 - y1);
+        int sx = (x1 < x2) ? 1 : -1;
+        int sy = (y1 < y2) ? 1 : -1;
+        int err = dx - dy;
+
+        int x = x1;
+        int y = y1;
+
+        while (true) {
+            if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT) {
+                SetPixel(window.context, x, y, RGB(255, 255, 255));
+            }
+
+            if (x == x2 && y == y2)
+                break;
+
+            int err2 = err * 2;
+
+            if (err2 > -dy) {
+                err -= dy;
+                x += sx;
+            }
+
+            if (err2 < dx) {
+                err += dx;
+                y += sy;
+            }
+        }
+    }
+
+    void DrawCube(const vector <Point3D>& point)
+    {
+        vector <Point3D> projectedPoints;
+        for (const auto& p : point)
+        {
+            projectedPoints.push_back(ProjectPoint(p));
+        }
+
+        for (const auto& edge : cubeEdges)
+        {
+            int startIdx = edge.first;
+            int endIdx = edge.second;
+            DrawLine(
+                projectedPoints[startIdx].x,
+                projectedPoints[startIdx].y,
+                projectedPoints[endIdx].x,
+                projectedPoints[endIdx].y
+            );
+        }
+    }
+
+    void DrawFilledTriangleWithZBuffer(int x1, int y1, float z1,
+        int x2, int y2, float z2,
+        int x3, int y3, float z3,
+        COLORREF color)
+    {
+        // Сортируем точки по Y (от самой верхней к самой нижней)
+        Point2D points[3] = { {x1, y1}, {x2, y2}, {x3, y3} };
+        float zPoints[3] = { z1, z2, z3 };
+
+        // Сортировка пузырьком по Y вместе с z-координатами
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2 - i; j++) {
+                if (points[j].y > points[j + 1].y) {
+                    swap(points[j], points[j + 1]);
+                    swap(zPoints[j], zPoints[j + 1]);
+                }
+            }
+        }
+
+        // Создаем 3D точки для интерполяции
+        Point3D p3d1(points[0].x, points[0].y, zPoints[0]);
+        Point3D p3d2(points[1].x, points[1].y, zPoints[1]);
+        Point3D p3d3(points[2].x, points[2].y, zPoints[2]);
+
+        // Верхняя часть треугольника (от points[0] до points[1])
+        float invSlope1 = (points[1].x - points[0].x) / (float)(points[1].y - points[0].y);
+        float invSlope2 = (points[2].x - points[0].x) / (float)(points[2].y - points[0].y);
+
+        float curX1 = points[0].x;
+        float curX2 = points[0].x;
+
+        for (int y = points[0].y; y <= points[1].y; y++) {
+            int startX = (int)min(curX1, curX2);
+            int endX = (int)max(curX1, curX2);
+
+            for (int x = startX; x <= endX; x++) {
+                if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT) {
+                    float z = InterpolateZ(p3d1, p3d2, p3d3, x, y);
+                    if (UpdateZBuffer(x, y, z)) {
+                        SetPixel(window.context, x, y, color);
+                    }
+                }
+            }
+
+            curX1 += invSlope1;
+            curX2 += invSlope2;
+        }
+
+        // Нижняя часть треугольника (от points[1] до points[2])
+        float invSlope3 = (points[2].x - points[1].x) / (float)(points[2].y - points[1].y);
+
+        curX1 = points[1].x;
+        curX2 = points[0].x + invSlope2 * (points[1].y - points[0].y);
+        for (int y = points[1].y + 1; y <= points[2].y; y++) {
+            int startX = (int)min(curX1, curX2);
+            int endX = (int)max(curX1, curX2);
+
+            for (int x = startX; x <= endX; x++) {
+                if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT) {
+                    float z = InterpolateZ(p3d1, p3d2, p3d3, x, y);
+                    if (UpdateZBuffer(x, y, z)) {
+                        SetPixel(window.context, x, y, color);
+                    }
+                }
+            }
+
+            curX1 += invSlope3;
+            curX2 += invSlope2;
+        }
+    }
+
+    void DrawFilledTriangle3D(const Point3D& p1, const Point3D& p2, const Point3D& p3, COLORREF color)
+    {
+        // Проецируем 3D точки на экран
+        Point3D proj1 = ProjectPoint(p1);
+        Point3D proj2 = ProjectPoint(p2);
+        Point3D proj3 = ProjectPoint(p3);
+
+        // Рисуем залитый треугольник с z-буферизацией
+        DrawFilledTriangleWithZBuffer(
+            static_cast<int>(proj1.x), static_cast<int>(proj1.y), proj1.z,
+            static_cast<int>(proj2.x), static_cast<int>(proj2.y), proj2.z,
+            static_cast<int>(proj3.x), static_cast<int>(proj3.y), proj3.z,
+            color
+        );
+    }
+
+    void DrawFilledCube(const vector<Point3D>& points)
+    {
+        vector<COLORREF> colors = {
+            RGB(255, 0, 0),   // красный - передняя грань
+            RGB(0, 255, 0),   // зеленый - задняя грань  
+            RGB(0, 0, 255),   // синий - левая грань
+            RGB(255, 255, 0), // желтый - правая грань
+            RGB(255, 0, 255), // пурпурный - нижняя грань
+            RGB(0, 255, 255)  // голубой - верхняя грань
+        };
+
+        int colorIndex = 0;
+
+        // Для каждой грани рисуем 2 треугольника
+        for (const auto& face : cubeFaces) {
+            COLORREF color = colors[colorIndex];
+
+            // Первый треугольник грани
+            DrawFilledTriangle3D(
+                points[face[0]], points[face[1]], points[face[2]], color
+            );
+            // Второй треугольник грани
+            DrawFilledTriangle3D(
+                points[face[0]], points[face[2]], points[face[3]], color
+            );
+
+            colorIndex++;
+        }
+    }
+
+    void DrawRotatingCube()
+    {
+        // Инициализируем z-буфер если еще не инициализирован
+        if (!zBufferInitialized) {
+            InitializeZBuffer();
+        }
+
+        ClearZBuffer();
+
+        static float angleX = 0;
+        static float angleY = 0;
+        static float angleZ = 0;
+
+        Matrix4x4 rotX = TurnX(angleX);
+        Matrix4x4 rotY = TurnY(angleY);
+        Matrix4x4 rotZ = TurnZ(angleZ);
+
+        Matrix4x4 rotation = MultiplyMatrices(rotZ, MultiplyMatrices(rotY, rotX));
+        vector <Point3D> transformedPoints;
+
+        // Применяем преобразования к исходным точкам
+        for (const auto& point : StartPoints) {
+            Point3D transformed = MultiplyPointMatrix(point, rotation);
+            transformedPoints.push_back(transformed);
+        }
+
+        // Рисуем куб с z-буферизацией
+        DrawFilledCube(transformedPoints);
+
+        // Обновляем углы для анимации
+        angleX += 0.05f;
+        angleY += 0.05f;
+        angleZ += 0.05f;
+
+        // Ограничиваем углы чтобы избежать переполнения
+        if (angleX > 2 * 3.14159f) angleX -= 2 * 3.14159f;
+        if (angleY > 2 * 3.14159f) angleY -= 2 * 3.14159f;
+        if (angleZ > 2 * 3.14159f) angleZ -= 2 * 3.14159f;
+    }
+}
+
 
