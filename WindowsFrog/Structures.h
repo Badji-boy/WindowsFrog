@@ -706,47 +706,71 @@ namespace Cube3D
         int x3, int y3, float z3,
         COLORREF color)
     {
-        // Находим ограничивающий прямоугольник треугольника
-        int minX = min(x1, min(x2, x3));
-        int maxX = max(x1, max(x2, x3));
-        int minY = min(y1, min(y2, y3));
-        int maxY = max(y1, max(y2, y3));
+        // Сортируем точки по Y (от самой верхней к самой нижней)
+        Point2D points[3] = { {x1, y1}, {x2, y2}, {x3, y3} };
+        float zPoints[3] = { z1, z2, z3 };
 
-        // Ограничиваем область экраном
-        minX = max(0, minX);
-        maxX = min(SCREEN_WIDTH - 1, maxX);
-        minY = max(0, minY);
-        maxY = min(SCREEN_HEIGHT - 1, maxY);
+        // Сортировка пузырьком по Y вместе с z-координатами
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2 - i; j++) {
+                if (points[j].y > points[j + 1].y) {
+                    swap(points[j], points[j + 1]);
+                    swap(zPoints[j], zPoints[j + 1]);
+                }
+            }
+        }
 
         // Создаем 3D точки для интерполяции
-        Point3D p1(x1, y1, z1);
-        Point3D p2(x2, y2, z2);
-        Point3D p3(x3, y3, z3);
+        Point3D p3d1(points[0].x, points[0].y, zPoints[0]);
+        Point3D p3d2(points[1].x, points[1].y, zPoints[1]);
+        Point3D p3d3(points[2].x, points[2].y, zPoints[2]);
 
-        // Проходим по каждому пикселю в ограничивающем прямоугольнике
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = minX; x <= maxX; x++) {
-                // Вычисляем барицентрические координаты
-                float denom = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
-                if (fabs(denom) < 1e-6) continue;
+        // Верхняя часть треугольника (от points[0] до points[1])
+        float invSlope1 = (points[1].x - points[0].x) / (float)(points[1].y - points[0].y);
+        float invSlope2 = (points[2].x - points[0].x) / (float)(points[2].y - points[0].y);
 
-                float lambda1 = ((p2.y - p3.y) * (x - p3.x) + (p3.x - p2.x) * (y - p3.y)) / denom;
-                float lambda2 = ((p3.y - p1.y) * (x - p3.x) + (p1.x - p3.x) * (y - p3.y)) / denom;
-                float lambda3 = 1.0f - lambda1 - lambda2;
+        float curX1 = points[0].x;
+        float curX2 = points[0].x;
 
-                // Проверяем, находится ли точка внутри треугольника
-                if (lambda1 >= 0 && lambda2 >= 0 && lambda3 >= 0) {
-                    // Интерполируем z-координату
-                    float z = lambda1 * p1.z + lambda2 * p2.z + lambda3 * p3.z;
+        for (int y = points[0].y; y <= points[1].y; y++) {
+            int startX = (int)min(curX1, curX2);
+            int endX = (int)max(curX1, curX2);
 
-                    // Обновляем z-буфер и рисуем пиксель
+            for (int x = startX; x <= endX; x++) {
+                if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT) {
+                    float z = InterpolateZ(p3d1, p3d2, p3d3, x, y);
                     if (UpdateZBuffer(x, y, z)) {
                         SetPixel(window.context, x, y, color);
                     }
                 }
             }
+
+            curX1 += invSlope1;
+            curX2 += invSlope2;
         }
-    
+
+        // Нижняя часть треугольника (от points[1] до points[2])
+        float invSlope3 = (points[2].x - points[1].x) / (float)(points[2].y - points[1].y);
+
+        curX1 = points[1].x;
+        curX2 = points[0].x + invSlope2 * (points[1].y - points[0].y);
+
+        for (int y = points[1].y + 1; y <= points[2].y; y++) {
+            int startX = (int)min(curX1, curX2);
+            int endX = (int)max(curX1, curX2);
+
+            for (int x = startX; x <= endX; x++) {
+                if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT) {
+                    float z = InterpolateZ(p3d1, p3d2, p3d3, x, y);
+                    if (UpdateZBuffer(x, y, z)) {
+                        SetPixel(window.context, x, y, color);
+                    }
+                }
+            }
+
+            curX1 += invSlope3;
+            curX2 += invSlope2;
+        }
     }
 
     void DrawFilledTriangle3D(const Point3D& p1, const Point3D& p2, const Point3D& p3, COLORREF color)
